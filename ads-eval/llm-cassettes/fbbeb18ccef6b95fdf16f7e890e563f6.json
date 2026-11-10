@@ -1,0 +1,6 @@
+{
+  "model" : "internal:claude/haiku",
+  "key" : "fbbeb18ccef6b95fdf16f7e890e563f6",
+  "recordedAt" : "2026-11-10T07:50:10.864524Z",
+  "text" : "{\"commercialIntent\":0.55,\"queries\":[\"клиент планирует ремонт кухни и прикидывает бюджет\",\"клиенту не хватает собственных средств на ремонт кухни\"],\"topics\":[{\"id\":\"home_renovation\",\"confidence\":0.95},{\"id\":\"consumer_loan\",\"confidence\":0.6}]}"
+}

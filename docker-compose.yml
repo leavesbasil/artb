@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ads
+      POSTGRES_USER: ads
+      POSTGRES_PASSWORD: ads
+    ports:
+      - "5433:5432"
+    volumes:
+      - ads-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ads -d ads"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  ads-pg:

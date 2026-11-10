@@ -1,0 +1,6 @@
+{
+  "model" : "internal:claude/haiku",
+  "key" : "fea0dc29cdd9ecda0a2716d7274b6f54",
+  "recordedAt" : "2026-11-10T07:50:03.291265Z",
+  "text" : "{\"commercialIntent\":0.05,\"queries\":[\"клиент выясняет, как посмотреть реквизиты своей карты в приложении банка\",\"клиент получил инструкцию и благодарит ассистента, диалог завершён\"],\"topics\":[{\"id\":\"app_help\",\"confidence\":0.85},{\"id\":\"debit_card\",\"confidence\":0.4},{\"id\":\"general\",\"confidence\":0.6}]}"
+}

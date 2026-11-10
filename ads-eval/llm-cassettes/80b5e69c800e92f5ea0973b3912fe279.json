@@ -1,0 +1,6 @@
+{
+  "model" : "internal:claude/haiku",
+  "key" : "80b5e69c800e92f5ea0973b3912fe279",
+  "recordedAt" : "2026-11-10T07:48:23.292295Z",
+  "text" : "{\"commercialIntent\":0.75,\"queries\":[\"клиент выбирает автомобиль и думает, как его оплатить\",\"клиент рассматривает покупку машины в кредит\"],\"topics\":[{\"id\":\"auto\",\"confidence\":0.9},{\"id\":\"car_loan\",\"confidence\":0.9},{\"id\":\"consumer_loan\",\"confidence\":0.3}]}"
+}

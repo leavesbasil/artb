@@ -1,0 +1,202 @@
+# Golden set: что должен выбрать подбор на последней реплике клиента.
+# expect.campaign — ожидаемая кампания (ключ базового каталога), acceptable — тоже допустимые,
+# noAd — рекламы быть не должно, forbidden — эти кампании показывать нельзя.
+# category: explicit | latent | sensitive | neutral | segment
+
+- id: car-explicit
+  category: explicit
+  dialog:
+    - client: Присматриваю машину, думаю, как её оплатить. Может, в кредит?
+  expect: { campaign: car-loan }
+
+- id: mortgage-explicit
+  category: explicit
+  dialog:
+    - client: Хотим купить квартиру на вторичке. Сколько обычно нужно на первоначальный взнос?
+  expect: { campaign: mortgage }
+
+- id: refinancing-explicit
+  category: explicit
+  dialog:
+    - client: У меня три кредита в разных банках, неудобно платить в три места каждый месяц
+  expect: { campaign: refinancing }
+
+- id: deposit-explicit
+  category: explicit
+  dialog:
+    - client: Получил годовую премию, хочу положить деньги куда-нибудь под процент
+  expect: { campaign: deposit, acceptable: [savings-account, investments] }
+
+- id: invest-explicit
+  category: explicit
+  dialog:
+    - client: Хочу попробовать инвестировать, но не знаю, с чего начать
+  expect: { campaign: investments }
+
+- id: travel-insurance-explicit
+  category: explicit
+  dialog:
+    - client: Летим в Турцию в отпуск через месяц. Нужна ли нам страховка?
+  expect: { campaign: travel-insurance, acceptable: [travel-card] }
+
+- id: kids-explicit
+  category: explicit
+  dialog:
+    - client: Сыну восемь лет, хочу давать ему карманные деньги на карту, а не наличными
+  expect: { campaign: kids-card }
+
+- id: business-explicit
+  category: explicit
+  dialog:
+    - client: Регистрирую ИП, где лучше открыть счёт для бизнеса?
+  expect: { campaign: business-account }
+
+- id: credit-card-explicit
+  category: explicit
+  dialog:
+    - client: Нужна кредитная карта с длинным льготным периодом
+  expect: { campaign: credit-card }
+
+- id: salary-explicit
+  category: explicit
+  dialog:
+    - client: Устроился на новую работу, бухгалтерия просит реквизиты для зарплаты. Можно сюда?
+  expect: { campaign: salary }
+
+- id: pension-explicit
+  category: explicit
+  dialog:
+    - client: Мама в следующем месяце выходит на пенсию. Как ей получать пенсию на карту вашего банка?
+  expect: { campaign: pension }
+
+- id: cashback-explicit
+  category: explicit
+  dialog:
+    - client: Какая карта выгоднее, если я в основном трачу в супермаркетах? Хочу кэшбэк
+  expect: { campaign: debit-cashback }
+
+- id: renovation-latent
+  category: latent
+  dialog:
+    - client: Добрый день! Как посмотреть выписку за прошлый месяц?
+    - agent: Откройте раздел «История» в приложении и выберите период — выписку можно скачать в PDF.
+    - client: Спасибо. Кстати, мы планируем ремонт кухни, прикидываем бюджет, а своих денег пока не хватает
+  expect: { campaign: consumer-loan }
+
+- id: baby-latent
+  category: latent
+  dialog:
+    - client: Мы ждём второго ребёнка, в нашей двушке скоро станет совсем тесно
+  expect: { campaign: mortgage }
+
+- id: vacation-latent
+  category: latent
+  dialog:
+    - client: Бронирую отель и билеты на отпуск в Грузию на майские
+  expect: { campaign: travel-insurance, acceptable: [travel-card] }
+
+- id: savings-latent
+  category: latent
+  dialog:
+    - client: Хочу начать откладывать часть зарплаты на подушку безопасности, но деньги всё время уходят
+  expect: { campaign: savings-account, acceptable: [deposit] }
+
+- id: home-insurance-latent
+  category: latent
+  dialog:
+    - client: Закончили ремонт в новой квартире, теперь всё время боимся залить соседей снизу
+  expect: { campaign: home-insurance }
+
+- id: car-sold-latent
+  category: latent
+  dialog:
+    - client: Продал старую машину, хочу через год купить новую, а пока деньги лежат на карте
+  expect: { campaign: deposit, acceptable: [savings-account, car-loan] }
+
+- id: hardship
+  category: sensitive
+  dialog:
+    - client: Потерял работу, платить по кредиту нечем. Можно как-то получить отсрочку?
+  expect: { noAd: true }
+
+- id: fraud
+  category: sensitive
+  dialog:
+    - client: Мне позвонили якобы из банка, попросили код из СМС, я назвал — и с карты пропали деньги
+  expect: { noAd: true }
+
+- id: disputed
+  category: sensitive
+  dialog:
+    - client: Вижу списание на пять тысяч, которое я точно не совершал
+  expect: { noAd: true }
+
+- id: collectors
+  category: sensitive
+  dialog:
+    - client: Мне звонят коллекторы по старому долгу, что мне делать?
+  expect: { noAd: true }
+
+- id: bereavement
+  category: sensitive
+  dialog:
+    - client: Умер отец. Как получить деньги с его вклада?
+  expect: { noAd: true }
+
+- id: complaint
+  category: sensitive
+  dialog:
+    - client: Я очень недоволен, третий раз не могу дозвониться в вашу поддержку
+  expect: { noAd: true }
+
+- id: blocked-card
+  category: sensitive
+  dialog:
+    - client: Почему заблокировали мою карту? Стою на кассе и не могу оплатить продукты
+  expect: { noAd: true }
+
+- id: insurance-complaint
+  category: sensitive
+  dialog:
+    - client: Почему с меня списали страховку по кредиту? Я её не подключал и хочу вернуть деньги
+  expect: { noAd: true }
+
+- id: greeting
+  category: neutral
+  dialog:
+    - client: Привет!
+  expect: { noAd: true }
+
+- id: pin-change
+  category: neutral
+  dialog:
+    - client: Как поменять ПИН-код карты в приложении?
+  expect: { noAd: true }
+
+- id: thanks
+  category: neutral
+  dialog:
+    - client: Как посмотреть реквизиты карты?
+    - agent: Откройте карту в приложении и нажмите «Реквизиты».
+    - client: Спасибо, всё понятно!
+  expect: { noAd: true }
+
+- id: utilities
+  category: neutral
+  dialog:
+    - client: Как оплатить коммуналку через приложение?
+  expect: { noAd: true }
+
+- id: risky-renovation
+  category: segment
+  segments: [bankruptcy_risk, overdue_debt]
+  dialog:
+    - client: Планируем ремонт кухни, своих денег не хватает
+  expect: { forbidden: [consumer-loan, credit-card, refinancing] }
+
+- id: has-card-credit
+  category: segment
+  segments: [has_credit_card]
+  dialog:
+    - client: Нужна кредитная карта с длинным льготным периодом
+  expect: { forbidden: [credit-card] }

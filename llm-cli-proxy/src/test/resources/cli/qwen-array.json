@@ -1,0 +1,1 @@
+[{"type":"system","subtype":"init","session_id":"s1"},{"type":"assistant","message":{"content":[{"type":"text","text":"..."}]}},{"type":"result","subtype":"success","is_error":false,"result":"{\"commercialIntent\":0.7,\"queries\":[\"кредит на ремонт\"]}"}]

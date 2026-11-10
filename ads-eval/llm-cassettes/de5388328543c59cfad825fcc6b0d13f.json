@@ -1,0 +1,6 @@
+{
+  "model" : "internal:claude/haiku",
+  "key" : "de5388328543c59cfad825fcc6b0d13f",
+  "recordedAt" : "2026-11-10T07:50:00.381049Z",
+  "text" : "{\"commercialIntent\":0,\"queries\":[\"клиент начинает диалог с ассистентом банка и пока не обозначил конкретной потребности\"],\"topics\":[{\"id\":\"general\",\"confidence\":1}]}"
+}

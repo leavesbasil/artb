@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Реклама в диалоге — демо</title>
+<style>
+  :root {
+    --bg: #f6f6f4; --panel: #ffffff; --ink: #1d1d1b; --muted: #6b6b66; --line: #e3e2dd;
+    --accent: #2f5bd3; --accent-soft: #e8eefc; --client: #1d1d1b; --client-ink: #ffffff;
+    --ok: #2e7d4f; --warn: #a15c00; --bad: #b3261e; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #161615; --panel: #1f1f1d; --ink: #ecebe6; --muted: #9a9993; --line: #33332f;
+      --accent: #8aa8ff; --accent-soft: #24304d; --client: #ecebe6; --client-ink: #161615;
+      --ok: #7fcf9b; --warn: #e3a857; --bad: #f08a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  header h1 { font-size: 15px; margin: 0 12px 0 0; }
+  header label { color: var(--muted); font-size: 13px; }
+  select, input, button { font: inherit; color: inherit; }
+  select, input[type=text] { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  button { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .session { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; height: calc(100vh - 57px); }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; height: auto; } }
+  .chat { display: flex; flex-direction: column; border-right: 1px solid var(--line); min-height: 60vh; }
+  .messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; white-space: pre-wrap; }
+  .msg.client { align-self: flex-end; background: var(--client); color: var(--client-ink); }
+  .msg.agent { align-self: flex-start; background: var(--panel); border: 1px solid var(--line); }
+  .msg.system { align-self: center; color: var(--muted); font-size: 12px; }
+  .ad { align-self: flex-start; max-width: 80%; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 10px 12px; position: relative; }
+  .ad .label { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: center; }
+  .ad .label .seen { color: var(--ok); }
+  .ad h3 { margin: 4px 0 2px; font-size: 14px; }
+  .ad p { margin: 0 0 6px; }
+  .ad .disclaimer { font-size: 11px; color: var(--muted); }
+  .ad .close { position: absolute; top: 6px; right: 8px; border: 0; background: none; color: var(--muted); padding: 2px 6px; }
+  .ad .why { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .ad .chip { background: var(--accent-soft); border: 1px solid transparent; color: var(--ink); border-radius: 999px; padding: 6px 12px; margin-top: 4px; }
+  .ad.dismissed { opacity: .45; }
+  form.composer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--panel); }
+  form.composer input { flex: 1; }
+  .debug { overflow-y: auto; padding: 16px; }
+  .debug h2 { font-size: 14px; margin: 0 0 8px; }
+  .turn { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); margin-bottom: 10px; padding: 10px 12px; }
+  .turn .head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .badge { font-size: 11px; border-radius: 6px; padding: 1px 6px; border: 1px solid var(--line); font-family: var(--mono); }
+  .badge.ISSUED { color: var(--accent); border-color: var(--accent); }
+  .badge.SHOWN { color: var(--ok); border-color: var(--ok); }
+  .badge.EXPIRED { color: var(--warn); border-color: var(--warn); }
+  .badge.NO_AD { color: var(--muted); }
+  .kv { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .kv code { font-family: var(--mono); color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 12px; }
+  th, td { text-align: left; padding: 3px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; }
+  td.num { font-family: var(--mono); text-align: right; white-space: nowrap; }
+  .thinking { color: var(--muted); font-size: 12px; padding: 0 16px 8px; min-height: 18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Реклама в диалоге</h1>
+  <label>Клиент
+    <select id="client">
+      <option value="client-clean">client-clean — без сегментов</option>
+      <option value="client-has-card">client-has-card — есть кредитка, зарплатный</option>
+      <option value="client-risky">client-risky — риск банкротства, просрочка</option>
+    </select>
+  </label>
+  <button id="restart">Новая сессия</button>
+  <span class="session" id="sessionInfo"></span>
+</header>
+<main>
+  <section class="chat">
+    <div class="messages" id="messages"></div>
+    <div class="thinking" id="thinking"></div>
+    <form class="composer" id="composer">
+      <input type="text" id="input" placeholder="Например: хочу сделать ремонт на кухне, своих денег не хватает" autocomplete="off">
+      <button class="primary" type="submit">Отправить</button>
+    </form>
+  </section>
+  <section class="debug">
+    <h2>Решения по ходам</h2>
+    <div id="debug"></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let sessionId = null;
+let busy = false;
+
+function newSessionId() {
+  return 's-' + Math.random().toString(36).slice(2, 10);
+}
+
+async function post(url, body) {
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (r.status === 204) return null;
+  const data = await r.json().catch(() => null);
+  if (!r.ok && r.status !== 422) throw new Error(url + ': ' + r.status);
+  return data;
+}
+
+async function restart() {
+  sessionId = newSessionId();
+  $('messages').innerHTML = '';
+  $('debug').innerHTML = '';
+  const res = await post('/demo/sessions', { sessionId, clientId: $('client').value });
+  $('sessionInfo').textContent = sessionId + ' · допущено кампаний: ' + res.eligibleCampaigns;
+  addSystem('Новая сессия. Сегменты клиента отфильтровали каталог до ' + res.eligibleCampaigns + ' кампаний.');
+}
+
+function addMessage(role, text) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.textContent = text;
+  $('messages').appendChild(el);
+  el.scrollIntoView({ block: 'end' });
+  return el;
+}
+
+function addSystem(text) { addMessage('system', text); }
+
+async function sendEvent(offer, type) {
+  const res = await post('/ads/events', { offerToken: offer.offerToken, type, occurredAt: new Date().toISOString(), surface: 'demo-web' });
+  refreshDebug();
+  return res;
+}
+
+// Показ считает поверхность: блок виден не меньше чем на 50% площади в течение секунды.
+function watchImpression(el, offer, onSeen) {
+  let timer = null;
+  let done = false;
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (done) return;
+      if (e.intersectionRatio >= 0.5) {
+        timer = timer || setTimeout(async () => {
+          done = true;
+          io.disconnect();
+          await sendEvent(offer, 'IMPRESSION');
+          onSeen();
+        }, 1000);
+      } else if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    }
+  }, { threshold: [0, 0.5, 1] });
+  io.observe(el);
+}
+
+function renderOffer(offer) {
+  const el = document.createElement('div');
+  el.className = 'ad';
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.innerHTML = '<span>Реклама' + (offer.erid ? ' · erid: ' + escapeHtml(offer.erid) : '') + '</span><span class="seen"></span>';
+  el.appendChild(label);
+
+  const close = document.createElement('button');
+  close.className = 'close';
+  close.title = 'Скрыть';
+  close.textContent = '×';
+  close.onclick = async () => { await sendEvent(offer, 'DISMISS'); el.classList.add('dismissed'); };
+  el.appendChild(close);
+
+  const c = offer.creative;
+  if (offer.format === 'CARD') {
+    el.insertAdjacentHTML('beforeend', '<h3>' + escapeHtml(c.title) + '</h3><p>' + escapeHtml(c.body) + '</p>'
+      + (c.disclaimer ? '<div class="disclaimer">' + escapeHtml(c.disclaimer) + '</div>' : ''));
+    const cta = document.createElement('button');
+    cta.className = 'primary';
+    cta.textContent = c.cta || 'Подробнее';
+    cta.onclick = async () => { await sendEvent(offer, 'CLICK'); addSystem('Переход по ссылке: ' + c.url); };
+    el.appendChild(cta);
+  } else {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.textContent = c.questionText;
+    chip.onclick = async () => {
+      if (busy) return;
+      await sendEvent(offer, 'QUESTION_CLICK');
+      send(c.questionText, offer.offerToken);
+    };
+    el.appendChild(chip);
+  }
+  if (offer.why) {
+    const why = document.createElement('div');
+    why.className = 'why';
+    why.textContent = 'Почему вы это видите: ' + offer.why;
+    el.appendChild(why);
+  }
+  $('messages').appendChild(el);
+  el.scrollIntoView({ block: 'end' });
+  watchImpression(el, offer, () => { label.querySelector('.seen').textContent = '✓ показ засчитан'; });
+}
+
+async function send(text, fromOfferToken) {
+  if (!text.trim() || busy) return;
+  busy = true;
+  addMessage('client', text);
+  $('thinking').textContent = 'Агент отвечает, подбор рекламы идёт параллельно…';
+  try {
+    const res = await post('/demo/chat', { sessionId, clientId: $('client').value, message: text, fromOfferToken: fromOfferToken || null });
+    addMessage('agent', res.answer);
+    if (res.offer) renderOffer(res.offer);
+  } catch (e) {
+    addSystem('Ошибка: ' + e.message);
+  } finally {
+    busy = false;
+    $('thinking').textContent = '';
+    refreshDebug();
+  }
+}
+
+async function refreshDebug() {
+  if (!sessionId) return;
+  const rows = await fetch('/debug/offers?sessionId=' + encodeURIComponent(sessionId)).then(r => r.json());
+  $('debug').innerHTML = rows.slice().reverse().map(renderTurn).join('');
+}
+
+function renderTurn(o) {
+  const decision = o.status === 'NO_AD'
+    ? 'без рекламы: <code>' + o.noAdReason + '</code>'
+    : '<code>' + o.format + '</code> · relevance ' + fmt(o.relevance) + ' · score ' + fmt(o.score);
+  const lat = o.latencyMs ? Object.entries(o.latencyMs).map(([k, v]) => k + ' ' + v + ' мс').join(' · ') : '';
+  const topics = (o.topics || []).map(t => t.id + ' ' + fmt(t.confidence)).join(', ');
+  const cands = (o.candidates || []).slice(0, 8).map(c =>
+    '<tr><td>' + escapeHtml(c.name) + '</td><td class="num">' + fmt(c.similarity) + '</td><td class="num">' + fmt(c.relevance)
+    + '</td><td class="num">' + fmt(c.score) + '</td><td>' + escapeHtml(c.reason || '') + '</td></tr>').join('');
+  return '<div class="turn"><div class="head"><strong>Ход ' + o.turnNo + '</strong><span class="badge ' + o.status + '">' + o.status + '</span>'
+    + (o.fromCache ? '<span class="badge">кэш</span>' : '') + '<span>' + decision + '</span></div>'
+    + (o.intentQueries ? '<div class="kv">интент ' + fmt(o.commercialIntent) + ': <code>' + escapeHtml(o.intentQueries.join(' | ')) + '</code></div>' : '')
+    + (topics ? '<div class="kv">темы: <code>' + escapeHtml(topics) + '</code></div>' : '')
+    + (o.reason ? '<div class="kv">почему: ' + escapeHtml(o.reason) + '</div>' : '')
+    + (lat ? '<div class="kv">' + lat + '</div>' : '')
+    + (cands ? '<table><tr><th>Кандидат</th><th>sim</th><th>rel</th><th>score</th><th>Причина судьи</th></tr>' + cands + '</table>' : '')
+    + '</div>';
+}
+
+function fmt(x) { return x == null ? '—' : Number(x).toFixed(2); }
+function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
+
+$('composer').addEventListener('submit', (e) => { e.preventDefault(); const t = $('input').value; $('input').value = ''; send(t); });
+$('restart').onclick = restart;
+$('client').onchange = restart;
+restart();
+</script>
+</body>
+</html>

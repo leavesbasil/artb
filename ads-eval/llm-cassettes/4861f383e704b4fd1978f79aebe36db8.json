@@ -1,0 +1,6 @@
+{
+  "model" : "internal:claude/haiku",
+  "key" : "4861f383e704b4fd1978f79aebe36db8",
+  "recordedAt" : "2026-11-10T07:49:29.139040Z",
+  "text" : "{\"commercialIntent\":0.6,\"queries\":[\"клиент бронирует отель и авиабилеты на отпуск в Грузию на майские праздники\",\"клиент планирует поездку в Грузию и может понадобиться обмен валюты на расходы в отпуске\"],\"topics\":[{\"id\":\"travel\",\"confidence\":0.95},{\"id\":\"currency\",\"confidence\":0.35},{\"id\":\"cashback\",\"confidence\":0.2}]}"
+}

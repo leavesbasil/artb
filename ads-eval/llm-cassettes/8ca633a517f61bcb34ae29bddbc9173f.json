@@ -1,0 +1,6 @@
+{
+  "model" : "internal:claude/haiku",
+  "key" : "8ca633a517f61bcb34ae29bddbc9173f",
+  "recordedAt" : "2026-11-10T07:49:05.641030Z",
+  "text" : "{\"commercialIntent\":0.6,\"queries\":[\"клиент помогает маме оформить получение пенсии на карту банка после выхода на пенсию\",\"клиент выясняет, как перевести пенсионные выплаты на карту и какие для этого нужны шаги\"],\"topics\":[{\"id\":\"pension\",\"confidence\":0.95},{\"id\":\"debit_card\",\"confidence\":0.5},{\"id\":\"salary\",\"confidence\":0.3}]}"
+}
