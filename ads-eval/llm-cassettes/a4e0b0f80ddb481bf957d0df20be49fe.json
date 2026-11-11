@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "a4e0b0f80ddb481bf957d0df20be49fe",
+  "recordedAt" : "2026-11-11T09:31:08.551294Z",
+  "text" : "{\n  \"commercialIntent\": 1,\n  \"queries\": [\n    \"нужна кредитная карта\",\n    \"длительный льготный период\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1,\n      \"id\": \"credit_card\"\n    }\n  ]\n}"
+}

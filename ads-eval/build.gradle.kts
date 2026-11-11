@@ -26,7 +26,8 @@ tasks.register<JavaExec>("eval") {
             .filter { it.isNotEmpty() && !it.startsWith("#") && it.contains("=") }
             .forEach { line ->
                 val key = line.substringBefore("=").trim()
-                if (System.getenv(key) == null) environment(key, line.substringAfter("=").trim())
+                val value = line.substringAfter("=").trim().removeSurrounding("\"").removeSurrounding("'")
+                if (System.getenv(key) == null) environment(key, value)
             }
     }
 }

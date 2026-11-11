@@ -51,7 +51,7 @@ public class DefaultLlmGateway implements LlmGateway {
                     : model.call(prompt);
             String text = response.getResult().getOutput().getText();
             try {
-                T value = converter.convert(text);
+                T value = converter.convert(extractJson(text));
                 if (value == null) {
                     throw new IllegalArgumentException("пустой ответ");
                 }
@@ -72,6 +72,25 @@ public class DefaultLlmGateway implements LlmGateway {
         ChatModel model = models.forStage(stage);
         ChatResponse response = model.call(new Prompt(List.of(new SystemMessage(system), new UserMessage(mask(user)))));
         return new LlmCall<>(response.getResult().getOutput().getText(), models.idFor(stage), elapsedMs(started));
+    }
+
+    /**
+     * Вырезает JSON из ответа модели. GigaChat при схеме в промпте часто оборачивает JSON
+     * в обратные кавычки, причём не всегда парные (```{…}`), а парсер Spring AI снимает только
+     * правильные блоки ```json … ```. Берём текст от первой открывающей скобки до последней закрывающей.
+     */
+    static String extractJson(String text) {
+        if (text == null) {
+            return null;
+        }
+        int obj = text.indexOf('{');
+        int arr = text.indexOf('[');
+        int start = obj < 0 ? arr : arr < 0 ? obj : Math.min(obj, arr);
+        if (start < 0) {
+            return text;
+        }
+        int end = text.lastIndexOf(text.charAt(start) == '{' ? '}' : ']');
+        return end > start ? text.substring(start, end + 1) : text;
     }
 
     private String mask(String text) {

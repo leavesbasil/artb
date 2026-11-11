@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "9780ff2a8a9785af15d7fd21f2f8ec18",
+  "recordedAt" : "2026-11-11T09:35:32.626219Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"планирование ремонта кухни\",\n    \"недостаточно собственных средств для ремонта\",\n    \"поиск финансирования на ремонт\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"home_renovation\"\n    }\n  ]\n}"
+}

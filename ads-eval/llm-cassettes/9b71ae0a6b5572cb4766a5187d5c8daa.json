@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "9b71ae0a6b5572cb4766a5187d5c8daa",
+  "recordedAt" : "2026-11-11T09:32:12.639414Z",
+  "text" : "{\n  \"commercialIntent\": 1,\n  \"queries\": [\n    \"рассматривает возможность покупки машины\",\n    \"думает об оплате автомобиля\",\n    \"интересуется автокредитом\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"car_loan\",\n      \"confidence\": 1\n    }\n  ]\n}"
+}

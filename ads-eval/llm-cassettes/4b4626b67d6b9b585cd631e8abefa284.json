@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "4b4626b67d6b9b585cd631e8abefa284",
+  "recordedAt" : "2026-11-11T09:35:38.215265Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"После завершения ремонта стоит подумать о защите своего имущества.\",\n      \"relevance\": 0.5\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Экономьте на покупках для ремонта с помощью возврата части потраченных средств.\",\n      \"relevance\": 0.8\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"c3-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Страховка пригодится позже, когда планируете поездку после ремонта.\",\n      \"relevance\": 0.3\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"c4-q2\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Создайте финансовую подушку безопасности для непредвиденных расходов во время ремонта.\",\n      \"relevance\": 0.7\n    },\n    {\n      \"candidateId\": \"c5\",\n      \"creativeId\": \"c5-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Полезно знать про преимущества карты для будущих покупок после ремонта.\",\n      \"relevance\": 0.4\n    }\n  ]\n}"
+}

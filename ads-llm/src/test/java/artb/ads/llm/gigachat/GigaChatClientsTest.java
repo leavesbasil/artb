@@ -43,6 +43,10 @@ class GigaChatClientsTest {
     private final List<JsonNode> embeddingRequests = new CopyOnWriteArrayList<>();
     private final Map<String, String> authHeaders = new ConcurrentHashMap<>();
     private final AtomicInteger chatCalls = new AtomicInteger();
+    private final AtomicInteger rateLimited = new AtomicInteger();
+    private final AtomicInteger activeChats = new AtomicInteger();
+    private final AtomicInteger maxActiveChats = new AtomicInteger();
+    private volatile long chatDelayMs;
     private volatile String chatAnswer = "{\"commercialIntent\": 0.7, \"queries\": [\"ипотека\"]}";
 
     @BeforeEach
@@ -59,6 +63,18 @@ class GigaChatClientsTest {
             authHeaders.put("chat", ex.getRequestHeaders().getFirst("Authorization"));
             chatRequests.add(JSON.readTree(body(ex)));
             chatCalls.incrementAndGet();
+            maxActiveChats.accumulateAndGet(activeChats.incrementAndGet(), Math::max);
+            try {
+                Thread.sleep(chatDelayMs);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                activeChats.decrementAndGet();
+            }
+            if (rateLimited.getAndDecrement() > 0) {
+                respond(ex, 429, "{\"status\":429,\"message\":\"Too Many Requests\"}");
+                return;
+            }
             respond(ex, 200, JSON.writeValueAsString(Map.of(
                     "choices", List.of(Map.of("index", 0, "finish_reason", "stop",
                             "message", Map.of("role", "assistant", "content", chatAnswer))),
@@ -76,6 +92,7 @@ class GigaChatClientsTest {
             }
             respond(ex, 200, JSON.writeValueAsString(Map.of("object", "list", "model", "EmbeddingsGigaR", "data", data)));
         });
+        server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         server.start();
     }
 
@@ -101,7 +118,7 @@ class GigaChatClientsTest {
 
         // OAuth: Basic с ключом авторизации, scope в теле, RqUID; токен получен один раз на оба вызова.
         assertThat(oauthRequests).hasSize(1);
-        assertThat(oauthRequests.getFirst().get("authorization")).isEqualTo("Basic test-key");
+        assertThat(oauthRequests.getFirst().get("authorization")).isEqualTo("Basic dGVzdDprZXk=");
         assertThat(oauthRequests.getFirst().get("body")).isEqualTo("scope=GIGACHAT_API_PERS");
         assertThat(oauthRequests.getFirst().get("rquid")).isNotBlank().isNotEqualTo("null");
         assertThat(authHeaders.get("chat")).isEqualTo("Bearer tok-1");
@@ -111,6 +128,43 @@ class GigaChatClientsTest {
         String userText = lastUserMessage(chatRequests.getFirst());
         assertThat(userText).contains("[ТЕЛЕФОН]").doesNotContain("916").contains("commercialIntent");
         assertThat(chatRequests.getFirst().has("response_format")).isFalse();
+    }
+
+    @Test
+    void rateLimitIsRetriedWithBackoff() {
+        rateLimited.set(2);
+        LlmProperties props = props();
+        props.getGigachat().setMaxRetries(3);
+        props.setDefaultStage(new StageModel("gigachat", "GigaChat-2"));
+        var gateway = new DefaultLlmGateway(new StageModels(props, new GigaChatClients(props.getGigachat())),
+                new RegexPiiMasker(), true);
+
+        LlmCall<Intent> call = gateway.call(LlmStage.GATE, "s", "u", Intent.class);
+
+        assertThat(call.value().commercialIntent()).isEqualTo(0.7);
+        assertThat(chatCalls.get()).isEqualTo(3);
+    }
+
+    @Test
+    void concurrentCallsAreQueuedToConfiguredLimit() throws Exception {
+        chatDelayMs = 150;
+        LlmProperties props = props();
+        props.getGigachat().setMaxConcurrency(1);
+        props.setDefaultStage(new StageModel("gigachat", "GigaChat-2"));
+        var gateway = new DefaultLlmGateway(new StageModels(props, new GigaChatClients(props.getGigachat())),
+                new RegexPiiMasker(), true);
+
+        try (var pool = java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor()) {
+            var calls = java.util.stream.IntStream.range(0, 4)
+                    .mapToObj(i -> pool.submit(() -> gateway.call(LlmStage.GATE, "s", "u" + i, Intent.class)))
+                    .toList();
+            for (var c : calls) {
+                assertThat(c.get().value().commercialIntent()).isEqualTo(0.7);
+            }
+        }
+
+        assertThat(chatCalls.get()).isEqualTo(4);
+        assertThat(maxActiveChats.get()).isEqualTo(1);
     }
 
     @Test
@@ -150,12 +204,44 @@ class GigaChatClientsTest {
                 .hasMessageContaining("GIGACHAT_CREDENTIALS");
     }
 
+    @Test
+    void credentialsAreNormalizedAndMalformedOnesRejectedBeforeOAuth() {
+        assertThat(GigaChatClients.normalizeCredentials("\"ZGF0YQ==\"")).isEqualTo("ZGF0YQ==");
+        assertThat(GigaChatClients.normalizeCredentials(" 'ZGF0YQ==' ")).isEqualTo("ZGF0YQ==");
+        assertThat(GigaChatClients.normalizeCredentials("Basic ZGF0YQ==")).isEqualTo("ZGF0YQ==");
+        assertThatThrownBy(() -> GigaChatClients.normalizeCredentials("0f0e-id:ZGF0YQ=="))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("двоеточие")
+                .hasMessageNotContaining("ZGF0YQ");
+        assertThatThrownBy(() -> GigaChatClients.normalizeCredentials("не base64"))
+                .hasMessageContaining("Base64");
+
+        LlmProperties props = props();
+        props.getGigachat().setCredentials("client:secret");
+        assertThatThrownBy(() -> new GigaChatClients(props.getGigachat()).chatModel("GigaChat-2"))
+                .hasMessageContaining("двоеточие");
+        assertThat(oauthRequests).isEmpty();
+    }
+
+    @Test
+    void quotedCredentialsReachOAuthWithoutQuotes() {
+        LlmProperties props = props();
+        props.getGigachat().setCredentials("\"dGVzdDprZXk=\"");
+        props.setDefaultStage(new StageModel("gigachat", "GigaChat-2"));
+        var gateway = new DefaultLlmGateway(new StageModels(props, new GigaChatClients(props.getGigachat())),
+                new RegexPiiMasker(), true);
+
+        gateway.call(LlmStage.GATE, "s", "u", Intent.class);
+
+        assertThat(oauthRequests.getFirst().get("authorization")).isEqualTo("Basic dGVzdDprZXk=");
+    }
+
     private LlmProperties props() {
         LlmProperties props = new LlmProperties();
         String base = "http://127.0.0.1:" + server.getAddress().getPort();
         props.getGigachat().setBaseUrl(base + "/api/v1");
         props.getGigachat().setAuthUrl(base + "/oauth");
-        props.getGigachat().setCredentials("test-key");
+        props.getGigachat().setCredentials("dGVzdDprZXk=");
         props.getGigachat().setMaxRetries(0);
         return props;
     }

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "1c2bce102c989a7a32a0d5bd6b15948a",
+  "recordedAt" : "2026-11-11T09:35:30.892520Z",
+  "text" : "{\n  \"commercialIntent\": 0,\n  \"queries\": [\n    \"Как посмотреть реквизиты карты?\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1,\n      \"id\": \"debit_card\"\n    }\n  ]\n}"
+}

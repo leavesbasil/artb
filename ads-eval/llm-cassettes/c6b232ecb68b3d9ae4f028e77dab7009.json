@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "c6b232ecb68b3d9ae4f028e77dab7009",
+  "recordedAt" : "2026-11-11T09:34:00.125274Z",
+  "text" : "{\n  \"commercialIntent\": 0.4,\n  \"queries\": [\n    \"клиент хочет посмотреть выписку за прошлый месяц\",\n    \"клиент планирует ремонт кухни и ищет способы финансирования\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"home_renovation\",\n      \"confidence\": 1.0\n    }\n  ]\n}"
+}

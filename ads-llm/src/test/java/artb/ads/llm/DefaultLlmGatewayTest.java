@@ -21,6 +21,20 @@ class DefaultLlmGatewayTest {
     record Intent(double commercialIntent, List<String> queries) {}
 
     @Test
+    void acceptsJsonWrappedInBackticksOrText() {
+        assertThat(DefaultLlmGateway.extractJson("```{\"a\":1}`")).isEqualTo("{\"a\":1}");
+        assertThat(DefaultLlmGateway.extractJson("```json\n{\"a\":{\"b\":[1]}}\n```")).isEqualTo("{\"a\":{\"b\":[1]}}");
+        assertThat(DefaultLlmGateway.extractJson("Ответ: [1,2] готово")).isEqualTo("[1,2]");
+        assertThat(DefaultLlmGateway.extractJson("не json")).isEqualTo("не json");
+
+        ChatModel model = prompt -> new ChatResponse(List.of(new Generation(
+                new AssistantMessage("```{\"commercialIntent\":0.6,\"queries\":[\"вклад\"]}`"))));
+        var gateway = new DefaultLlmGateway(fixed(model), new RegexPiiMasker(), true);
+
+        assertThat(gateway.call(LlmStage.INTENT, "s", "u", Intent.class).value().commercialIntent()).isEqualTo(0.6);
+    }
+
+    @Test
     void retriesOnceWhenAnswerBreaksSchemaAndMasksInput() {
         Queue<String> answers = new ConcurrentLinkedQueue<>(List.of("не json", "{\"commercialIntent\":0.8,\"queries\":[\"кредит\"]}"));
         List<Prompt> seen = new ArrayList<>();

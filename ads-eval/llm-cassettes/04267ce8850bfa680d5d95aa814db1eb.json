@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "04267ce8850bfa680d5d95aa814db1eb",
+  "recordedAt" : "2026-11-11T09:33:33.688879Z",
+  "text" : "{\"judgements\": [\n  {\"candidateId\": \"c1\", \"creativeId\": \"\", \"format\": \"\", \"reason\": \"Не связано с открытием счёта для бизнеса.\", \"relevance\": 0},\n  {\"candidateId\": \"c2\", \"creativeId\": \"\", \"format\": \"\", \"reason\": \"Связан косвенно через финансовые услуги, но не относится конкретно к бизнесу.\", \"relevance\": 0.3},\n  {\"candidateId\": \"c3\", \"creativeId\": \"\", \"format\": \"\", \"reason\": \"Кредит наличными не является прямым решением для открытия бизнес-счёта.\", \"relevance\": 0.2},\n  {\"candidateId\": \"c4\", \"creativeId\": \"\", \"format\": \"\", \"reason\": \"Полностью не соответствует запросу об открытии счёта для бизнеса.\", \"relevance\": 0},\n  {\"candidateId\": \"c5\", \"creativeId\": \"\", \"format\": \"\", \"reason\": \"Страхование путешествующих не имеет отношения к регистрации ИП и открытию счёта.\", \"relevance\": 0}\n]}"
+}

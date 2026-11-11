@@ -4,13 +4,26 @@
     {
       "name": "ads-demo",
       "runtimeExecutable": "./gradlew",
-      "runtimeArgs": [":ads-demo:bootRun"],
+      "runtimeArgs": [
+        ":ads-demo:bootRun"
+      ],
+      "port": 8080
+    },
+    {
+      "name": "ads-demo-hashing-embeddings",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": [
+        ":ads-demo:bootRun",
+        "--args=--ads.llm.embedding.provider=hashing"
+      ],
       "port": 8080
     },
     {
       "name": "llm-cli-proxy",
       "runtimeExecutable": "./gradlew",
-      "runtimeArgs": [":llm-cli-proxy:bootRun"],
+      "runtimeArgs": [
+        ":llm-cli-proxy:bootRun"
+      ],
       "port": 8090
     }
   ]

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "5be20ed357fad45e562e65915bb368f4",
+  "recordedAt" : "2026-11-11T09:32:43.010911Z",
+  "text" : "{\n  \"commercialIntent\": 1,\n  \"queries\": [\n    \"хочу вложить деньги под процент\",\n    \"куда вложить премию под хороший процент\",\n    \"депозиты и вклады с высоким процентом\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"deposit\",\n      \"confidence\": 1\n    }\n  ]\n}"
+}

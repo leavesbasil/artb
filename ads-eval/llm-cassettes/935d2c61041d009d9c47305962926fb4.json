@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "935d2c61041d009d9c47305962926fb4",
+  "recordedAt" : "2026-11-11T09:32:29.843430Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"клиенты интересуются размером первоначального взноса при покупке квартиры на вторичном рынке\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"mortgage\"\n    }\n  ]\n}"
+}

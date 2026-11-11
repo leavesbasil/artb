@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "82439405ea0f69323805812f79aaee77",
+  "recordedAt" : "2026-11-11T09:33:41.028276Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Вы ищете кредитную карту с длительным льготным периодом.\",\n      \"relevance\": 1\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.2\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c5\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.1\n    }\n  ]\n}"
+}

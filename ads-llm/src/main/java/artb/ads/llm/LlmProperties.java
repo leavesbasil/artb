@@ -98,9 +98,11 @@ public class LlmProperties {
         private boolean unsafeSsl = false;
         private Duration connectTimeout = Duration.ofSeconds(15);
         private Duration readTimeout = Duration.ofSeconds(60);
-        /** Повторы при сетевых и 5xx-ошибках; повтор при ответе не по схеме делает шлюз. */
-        private int maxRetries = 1;
-        /** Температура этапов; null — значение модели по умолчанию. */
+        /** Повторы при сетевых ошибках, 5xx и 429 (пауза 0.5, 1, 2 с…); повтор при ответе не по схеме делает шлюз. */
+        private int maxRetries = 3;
+        /** Одновременных запросов к API, не больше; 0 — без ограничения. У ключа физлица — 1. */
+        private int maxConcurrency = 1;
+                /** Температура этапов; null — значение модели по умолчанию. */
         private Double temperature;
 
         public String getBaseUrl() { return baseUrl; }
@@ -125,6 +127,8 @@ public class LlmProperties {
         public void setReadTimeout(Duration readTimeout) { this.readTimeout = readTimeout; }
         public int getMaxRetries() { return maxRetries; }
         public void setMaxRetries(int maxRetries) { this.maxRetries = maxRetries; }
+        public int getMaxConcurrency() { return maxConcurrency; }
+        public void setMaxConcurrency(int maxConcurrency) { this.maxConcurrency = maxConcurrency; }
         public Double getTemperature() { return temperature; }
         public void setTemperature(Double temperature) { this.temperature = temperature; }
     }

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "2446552f27ae9ee668f0a3af160a75d4",
+  "recordedAt" : "2026-11-11T09:34:28.292795Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Вы обсуждаете расширение жилплощади из-за пополнения семьи.\",\n      \"relevance\": 0.9\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Возможно, вы рассматриваете варианты улучшения жилищных условий, где наличные средства могут понадобиться.\",\n      \"relevance\": 0.4\n    }\n  ]\n}"
+}

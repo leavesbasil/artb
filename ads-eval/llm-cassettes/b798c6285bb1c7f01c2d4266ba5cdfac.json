@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "b798c6285bb1c7f01c2d4266ba5cdfac",
+  "recordedAt" : "2026-11-11T09:34:43.491358Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"Клиент пытается создать подушку безопасности, но испытывает сложности с контролем расходов.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"savings_account\"\n    }\n  ]\n}"
+}

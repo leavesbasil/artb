@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "8c09f20501b2fc443a9e62d1ccb5acfc",
+  "recordedAt" : "2026-11-11T09:35:03.580076Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Страхование поможет защитить вас и ваших соседей от непредвиденных ситуаций.\",\n      \"relevance\": 0.9\n    }\n  ]\n}"
+}

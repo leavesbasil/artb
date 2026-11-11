@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "77bcc197a808799ad4af81d66444f8c1",
+  "recordedAt" : "2026-11-11T09:33:28.825982Z",
+  "text" : "{\n  \"commercialIntent\": 1,\n  \"queries\": [\n    \"открыть счёт для ИП\",\n    \"лучший банковский счёт для бизнеса\",\n    \"где открыть расчётный счёт для нового бизнеса\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1,\n      \"id\": \"business\"\n    }\n  ]\n}"
+}

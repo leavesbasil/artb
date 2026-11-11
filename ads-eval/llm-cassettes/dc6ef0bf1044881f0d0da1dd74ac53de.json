@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "dc6ef0bf1044881f0d0da1dd74ac53de",
+  "recordedAt" : "2026-11-11T09:33:26.268397Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.2\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"c3-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Вы обсуждаете необходимость страховки перед путешествием.\",\n      \"relevance\": 0.9\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"\",\n      \"relevance\": 0.1\n    }\n  ]\n}"
+}

@@ -1,6 +1,5 @@
 package artb.ads.matching;
 
-import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -29,8 +28,7 @@ public class MatchingProperties {
     private int minTopicCandidates = 5;
     /** Сходство запросов с прошлым ходом, выше которого retrieval и судья берутся из кэша. */
     private double cacheQuerySimilarity = 0.9;
-    private Duration deadline = Duration.ofMillis(2500);
-    /** В CLI-профилях дедлайн выключен: вызов CLI занимает секунды. */
+    /** В CLI-профилях дедлайн выключен: вызов CLI занимает секунды. Сам дедлайн — ads.delivery.default-deadline. */
     private boolean deadlineEnabled = true;
 
     public int getHistoryTurns() { return historyTurns; }
@@ -55,8 +53,6 @@ public class MatchingProperties {
     public void setMinTopicCandidates(int v) { this.minTopicCandidates = v; }
     public double getCacheQuerySimilarity() { return cacheQuerySimilarity; }
     public void setCacheQuerySimilarity(double v) { this.cacheQuerySimilarity = v; }
-    public Duration getDeadline() { return deadline; }
-    public void setDeadline(Duration v) { this.deadline = v; }
     public boolean isDeadlineEnabled() { return deadlineEnabled; }
     public void setDeadlineEnabled(boolean v) { this.deadlineEnabled = v; }
 }

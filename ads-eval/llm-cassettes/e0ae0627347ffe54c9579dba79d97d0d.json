@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "e0ae0627347ffe54c9579dba79d97d0d",
+  "recordedAt" : "2026-11-11T09:35:28.924302Z",
+  "text" : "{\n  \"commercialIntent\": 0,\n  \"queries\": [\n    \"общий разговор\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1,\n      \"id\": \"general\"\n    ]\n  ]\n}"
+}

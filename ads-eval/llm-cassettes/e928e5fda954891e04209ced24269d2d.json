@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "e928e5fda954891e04209ced24269d2d",
+  "recordedAt" : "2026-11-11T09:33:42.245555Z",
+  "text" : "```{\"commercialIntent\":0,\"queries\":[\"новый сотрудник, предоставление реквизитов для зарплаты\"],\"topics\":[{\"confidence\":1,\"id\":\"salary\"}]}```"
+}

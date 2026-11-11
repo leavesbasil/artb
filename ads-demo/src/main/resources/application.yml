@@ -35,20 +35,22 @@ ads:
       certificate: ${GIGACHAT_CERTIFICATE:}          # вход по сертификату вместо ключа
       private-key: ${GIGACHAT_PRIVATE_KEY:}
       read-timeout: 60s
-      max-retries: 1
+      max-retries: 3            # сеть, 5xx и 429 — у ключа физлица лимит одновременных запросов
+      max-concurrency: ${GIGACHAT_MAX_CONCURRENCY:1}   # ключ физлица пропускает один запрос за раз; в контуре — больше
     # JSON-схему GigaChat API не принимает: шлюз передаёт её инструкцией в промпте и проверяет ответ.
     masking:
       enabled: true
     embedding:
-      provider: gigachat
+      # hashing — локальные лексические эмбеддинги, если на эмбеддинги GigaChat нет пакета токенов (402)
+      provider: ${ADS_EMBEDDING_PROVIDER:gigachat}
       model: ${ADS_EMBEDDING_MODEL:EmbeddingsGigaR}   # вектор 2560; колонка vector без фиксированной размерности
+      dimensions: 384                                  # только для hashing
   catalog:
     # 17 базовых синтетических продуктов (эмбеддинги платные — больше без нужды не заливаем).
     # Заливаются только в пустую базу; с реальным каталогом — ADS_SYNTHETIC_COUNT=0.
     synthetic-count: ${ADS_SYNTHETIC_COUNT:17}
-  matching:
-    deadline: ${ADS_MATCHING_DEADLINE:2500ms}   # на GigaChat не замерен
   delivery:
+    default-deadline: ${ADS_MATCHING_DEADLINE:2500ms}   # дедлайн подбора, если поверхность не прислала deadlineMs
     token-secret: ${ADS_TOKEN_SECRET:change-me-in-prod}
     offer-ttl: 30s
   targeting:

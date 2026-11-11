@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "388a42fc668e9cf4ff80d95dba1867f7",
+  "recordedAt" : "2026-11-11T09:33:27.493734Z",
+  "text" : "{\n  \"commercialIntent\": 0,\n  \"queries\": [\n    \"открыть детскую банковскую карту\",\n    \"переводить карманные деньги на карту ребенку\",\n    \"безопасный способ давать детям деньги\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"kids_family\",\n      \"confidence\": 1\n    }\n  ]\n}"
+}

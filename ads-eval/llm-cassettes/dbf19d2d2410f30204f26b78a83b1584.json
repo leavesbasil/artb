@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "dbf19d2d2410f30204f26b78a83b1584",
+  "recordedAt" : "2026-11-11T09:33:43.231098Z",
+  "text" : "```{\"commercialIntent\":0,\"queries\":[\"пенсионер получает пенсию на карту банка\"],\"topics\":[{\"confidence\":1,\"id\":\"pension\"}]}```"
+}

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "4b9170dd18374e3e57b136c060ab373c",
+  "recordedAt" : "2026-11-11T09:35:01.788124Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"страхование ответственности перед соседями\",\n    \"страховка затопления квартиры\",\n    \"защита от залива соседей\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"insurance\"\n    }\n  ]\n}"
+}

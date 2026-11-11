@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "a3ee14bb9a899b704ec2be791c407172",
+  "recordedAt" : "2026-11-11T09:31:14.250855Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Кредит наличными может стать альтернативой кредитной карте.\",\n      \"relevance\": 0.5\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Ваш текущий запрос касается кредитных карт, ипотека сейчас не актуальна.\",\n      \"relevance\": 0.2\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"c3-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Автокредит предназначен специально для автомобилей, поэтому не подходит под ваш запрос.\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"c4-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Дебетовая карта с кэшбэком не связана с вашим текущим запросом о кредитной карте.\",\n      \"relevance\": 0.2\n    }\n  ]\n}"
+}

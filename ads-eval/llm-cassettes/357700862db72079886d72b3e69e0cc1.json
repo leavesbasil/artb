@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "357700862db72079886d72b3e69e0cc1",
+  "recordedAt" : "2026-11-11T09:33:10.749726Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Вы хотите вложить средства под проценты.\",\n      \"relevance\": 0.9\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Ваш текущий запрос касается вложения средств, а не покупки авто.\",\n      \"relevance\": 0.2\n    }\n  ]\n}"
+}

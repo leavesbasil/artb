@@ -66,8 +66,10 @@ public final class EvalMain {
         String model = System.getProperty("eval.model", gigachat ? "GigaChat-2" : "claude/haiku");
         String judgeModel = System.getProperty("eval.judgeModel", gigachat ? "GigaChat-2-Max" : model);
         String embedding = System.getProperty("eval.embedding", gigachat ? "EmbeddingsGigaR" : "hashing");
+        // У ключа GigaChat физлица лимит одновременных запросов — по умолчанию последовательно.
+        int parallelism = Integer.parseInt(System.getProperty("eval.parallelism", gigachat ? "1" : "4"));
         String recording = System.getProperty("eval.recording", "record");
-        int parallelism = Integer.parseInt(System.getProperty("eval.parallelism", "4"));
+
         String only = System.getProperty("eval.only");
 
         LlmProperties llmProps = new LlmProperties();
