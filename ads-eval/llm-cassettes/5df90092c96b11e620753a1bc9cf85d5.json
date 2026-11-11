@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "5df90092c96b11e620753a1bc9cf85d5",
+  "recordedAt" : "2026-11-11T10:44:04.402654Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Обсуждаем удобство карты для детей, кэшбэк вторичен.\",\n      \"relevance\": 0.5\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Прямо отвечает потребностям — детская карта для сына восьми лет.\",\n      \"relevance\": 0.9\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"c3-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Не связано с детской картой или карманными деньгами.\",\n      \"relevance\": 0.2\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"c4-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Не по теме — путешествия не связаны с детской картой.\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c5\",\n      \"creativeId\": \"c5-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Не по теме — пенсия не связана с детской картой.\",\n      \"relevance\": 0.1\n    }\n  ]\n}"
+}

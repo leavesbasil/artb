@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "51e39dce564770f050320002a0186275",
+  "recordedAt" : "2026-11-11T10:47:02.232638Z",
+  "text" : "{\n  \"commercialIntent\": 0.6,\n  \"queries\": [\n    \"Клиент продал автомобиль и ищет способы эффективно разместить средства до покупки нового авто через год.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 0.8,\n      \"id\": \"savings_account\"\n    }\n  ]\n}"
+}

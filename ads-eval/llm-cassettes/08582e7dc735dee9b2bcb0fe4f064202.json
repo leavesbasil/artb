@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "08582e7dc735dee9b2bcb0fe4f064202",
+  "recordedAt" : "2026-11-11T10:47:16.641018Z",
+  "text" : "{\n  \"inappropriate\": true,\n  \"reason\": \"Клиент столкнулся с проблемой блокировки карты и не может совершить платеж.\"\n}"
+}

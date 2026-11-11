@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "e67488709d5233287dd2868a496e3218",
+  "recordedAt" : "2026-11-11T10:41:19.638665Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"Инвестиции сейчас не актуальны\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Вы рассматриваете варианты оплаты машины\",\n      \"relevance\": 0.9\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"Дебетовая карта не поможет оплатить авто\",\n      \"relevance\": 0.2\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"c4-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Кредит наличными тоже подойдёт для покупки авто\",\n      \"relevance\": 0.8\n    },\n    {\n      \"candidateId\": \"c5\",\n      \"creativeId\": \"\",\n      \"format\": \"\",\n      \"reason\": \"Рефинансирование пока не актуально\",\n      \"relevance\": 0.3\n    }\n  ]\n}"
+}

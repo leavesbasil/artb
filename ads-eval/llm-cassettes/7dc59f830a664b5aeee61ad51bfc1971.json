@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "7dc59f830a664b5aeee61ad51bfc1971",
+  "recordedAt" : "2026-11-11T10:47:19.962522Z",
+  "text" : "```json\n{\n  \"inappropriate\": true,\n  \"reason\": \"Клиент пытается решить техническую проблему с приложением.\"\n}\n```"
+}

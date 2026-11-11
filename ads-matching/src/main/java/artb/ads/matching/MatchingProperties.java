@@ -16,6 +16,8 @@ public class MatchingProperties {
     /** Порог для стоп-тем ниже: лучше лишний раз не показать. */
     private double sensitiveTopicConfidence = 0.3;
     private int topK = 20;
+    /** Сколько лучших по сходству кандидатов оценивает судья; остальные видны только в трассе. */
+    private int judgeTopK = 8;
     private int hitsPerQuery = 80;
     private double minSimilarity = 0.2;
     /**
@@ -42,6 +44,8 @@ public class MatchingProperties {
     public double getSensitiveTopicConfidence() { return sensitiveTopicConfidence; }
     public void setSensitiveTopicConfidence(double v) { this.sensitiveTopicConfidence = v; }
     public int getTopK() { return topK; }
+    public int getJudgeTopK() { return judgeTopK; }
+    public void setJudgeTopK(int v) { this.judgeTopK = v; }
     public void setTopK(int v) { this.topK = v; }
     public int getHitsPerQuery() { return hitsPerQuery; }
     public void setHitsPerQuery(int v) { this.hitsPerQuery = v; }

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "47829c1171ec991da8de04b06dea9bd3",
+  "recordedAt" : "2026-11-11T10:41:46.226589Z",
+  "text" : "{\n  \"commercialIntent\": 0.8,\n  \"queries\": [\n    \"объединить несколько кредитов в один\",\n    \"снизить ежемесячные платежи по кредитам\",\n    \"перейти на более выгодную программу кредитования\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"refinancing\",\n      \"confidence\": 1.0\n    }\n  ]\n}"
+}

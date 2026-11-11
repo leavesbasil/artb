@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "4168e8e9c9167cfdc6919e8fe9f1742d",
+  "recordedAt" : "2026-11-11T10:45:29.581512Z",
+  "text" : "```{\"commercialIntent\":0.7,\"queries\":[\"клиент планирует ремонт кухни и ищет финансирование\"],\"topics\":[{\"confidence\":1.0,\"id\":\"home_renovation\"},{\"confidence\":0.8,\"id\":\"consumer_loan\"}]}```"
+}

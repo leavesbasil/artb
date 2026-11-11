@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "9a30fd2b9891bb5dbb3fc8511048596b",
+  "recordedAt" : "2026-11-11T10:46:40.158946Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Вы планируете поездку, важно позаботиться о страховке.\",\n      \"relevance\": 0.9\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Отдых планируйте заранее, возможно, захотите отложить средства.\",\n      \"relevance\": 0.5\n    },\n    {\n      \"candidateId\": \"c3\",\n      \"creativeId\": \"c3-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Не по теме\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c4\",\n      \"creativeId\": \"c4-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Не по теме\",\n      \"relevance\": 0.1\n    },\n    {\n      \"candidateId\": \"c5\",\n      \"creativeId\": \"c5-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Возможно, хотите сохранить часть средств перед отпуском.\",\n      \"relevance\": 0.4\n    },\n    {\n      \"candidateId\": \"c6\",\n      \"creativeId\": \"c6-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Не по теме\",\n      \"relevance\": 0.1\n    }\n  ]\n}"
+}

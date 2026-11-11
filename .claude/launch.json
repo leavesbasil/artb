@@ -5,7 +5,8 @@
       "name": "ads-demo",
       "runtimeExecutable": "./gradlew",
       "runtimeArgs": [
-        ":ads-demo:bootRun"
+        ":ads-demo:bootRun",
+        "--args=--ads.delivery.default-deadline=30s"
       ],
       "port": 8080
     },
@@ -14,7 +15,7 @@
       "runtimeExecutable": "./gradlew",
       "runtimeArgs": [
         ":ads-demo:bootRun",
-        "--args=--ads.llm.embedding.provider=hashing"
+        "--args=--ads.llm.embedding.provider=hashing --ads.delivery.default-deadline=30s"
       ],
       "port": 8080
     }

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "e3aa301d0ad0d2e88e05d8982a846502",
+  "recordedAt" : "2026-11-11T10:44:22.907381Z",
+  "text" : "{\n  \"judgements\": [\n    {\n      \"candidateId\": \"c1\",\n      \"creativeId\": \"c1-card1\",\n      \"format\": \"CARD\",\n      \"reason\": \"Прямо отвечает вашей потребности в долгом льготном периоде.\",\n      \"relevance\": 1\n    },\n    {\n      \"candidateId\": \"c2\",\n      \"creativeId\": \"c2-q1\",\n      \"format\": \"QUESTION\",\n      \"reason\": \"Связан косвенно, возможно, вас интересует альтернативный вариант финансирования.\",\n      \"relevance\": 0.5\n    }\n  ]\n}"
+}

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "af96afa781930fc281d5adb4c1c16db7",
+  "recordedAt" : "2026-11-11T10:45:15.656821Z",
+  "text" : "{\n  \"commercialIntent\": 1.0,\n  \"queries\": [\n    \"клиент ищет карту с выгодным кэшбэком за покупки в супермаркетах\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"cashback\"\n    }\n  ]\n}"
+}

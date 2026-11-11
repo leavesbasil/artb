@@ -95,12 +95,15 @@ public class AdMatcher implements TurnMatcher {
                 return MatchOutcome.noAd(NoAdReason.ERROR, null, List.of(), new Trace(), false);
             }
         }
-        Future<MatchOutcome> future = EXECUTOR.submit(() -> match(turn));
+        // Трасса общая с потоком подбора: при дедлайне в ней уже есть пройденные этапы — видно, где застрял ход.
+        Trace trace = new Trace();
+        Future<MatchOutcome> future = EXECUTOR.submit(() -> match(turn, trace));
         try {
             return future.get(deadline.toMillis(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             future.cancel(true);
-            Trace trace = new Trace();
+            log.warn("Подбор не уложился в {} мс на ходе {} сессии {}; пройденные этапы: {}",
+                    deadline.toMillis(), turn.turnNo(), turn.sessionId(), trace.latencyMs());
             trace.stage("total", deadline.toMillis());
             return MatchOutcome.noAd(NoAdReason.TIMEOUT, null, List.of(), trace, false);
         } catch (InterruptedException e) {
@@ -113,7 +116,10 @@ public class AdMatcher implements TurnMatcher {
     }
 
     public MatchOutcome match(TurnRequest turn) {
-        Trace trace = new Trace();
+        return match(turn, new Trace());
+    }
+
+    private MatchOutcome match(TurnRequest turn, Trace trace) {
         long started = System.nanoTime();
         MatchOutcome outcome = doMatch(turn, trace);
         trace.stage("total", (System.nanoTime() - started) / 1_000_000);
@@ -175,8 +181,10 @@ public class AdMatcher implements TurnMatcher {
                 cache.put(turn.sessionId(), new SessionCache.Entry(dialogTopics, centroid, eligible.catalogVersion(), List.of(), List.of()));
                 return MatchOutcome.noAd(NoAdReason.NO_CANDIDATES, intent, List.of(), trace, false);
             }
-            Map<UUID, List<Creative>> creatives = repo.approvedCreatives(retrieved.stream().map(Retrieved::campaignId).toList());
-            judged = judge.judge(turn, retrieved, live, creatives, trace);
+            // Судье — только лучшие по сходству: время судьи растёт с числом кандидатов (каждому — оценка и причина).
+            List<Retrieved> toJudge = retrieved.subList(0, Math.min(retrieved.size(), props.getJudgeTopK()));
+            Map<UUID, List<Creative>> creatives = repo.approvedCreatives(toJudge.stream().map(Retrieved::campaignId).toList());
+            judged = judge.judge(turn, toJudge, live, creatives, trace);
             cache.put(turn.sessionId(), new SessionCache.Entry(dialogTopics, centroid, eligible.catalogVersion(), retrieved, judged));
         }
         if (retrieved.isEmpty()) {

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2-Max",
+  "key" : "cb86ef81f2f3063b848353099afe2f05",
+  "recordedAt" : "2026-11-11T10:47:42.203433Z",
+  "text" : "{\"judgements\": [{\"candidateId\": \"c1\", \"creativeId\": \"\", \"format\": \"\", \"reason\": \"Не по теме\", \"relevance\": 0.2}]}"
+}

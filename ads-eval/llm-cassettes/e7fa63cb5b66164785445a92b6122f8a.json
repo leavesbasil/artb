@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "e7fa63cb5b66164785445a92b6122f8a",
+  "recordedAt" : "2026-11-11T10:43:20.532933Z",
+  "text" : "{\n  \"commercialIntent\": 0.8,\n  \"queries\": [\n    \"Клиент интересуется инвестициями и ищет информацию о начале инвестирования.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"investments\"\n    }\n  ]\n}"
+}

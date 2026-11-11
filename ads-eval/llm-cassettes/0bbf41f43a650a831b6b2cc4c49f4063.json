@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "0bbf41f43a650a831b6b2cc4c49f4063",
+  "recordedAt" : "2026-11-11T10:46:29.600Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"планирует путешествие в Грузию на майские праздники\",\n    \"ищет способы оплаты поездки\",\n    \"рассматривает варианты финансирования отпуска\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"travel\",\n      \"confidence\": 1.0\n    },\n    {\n      \"id\": \"deposit\",\n      \"confidence\": 0.0\n    },\n    {\n      \"id\": \"consumer_loan\",\n      \"confidence\": 0.7\n    }\n  ]\n}"
+}
