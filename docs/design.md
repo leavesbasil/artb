@@ -346,7 +346,7 @@ ads:
       auth-url: https://ngw.devices.sberbank.ru:9443/api/v2/oauth
       scope: GIGACHAT_API_PERS                                    # в контуре — B2B или CORP
       credentials: ${GIGACHAT_CREDENTIALS}                        # ключ авторизации; локально — .env
-      ca-certs: ${GIGACHAT_CA_CERTS}                              # корневой сертификат Минцифры
+      ca-certs: classpath:certs/russian_trusted_root_ca.cer       # корневой сертификат Минцифры из ресурсов ads-llm
       read-timeout: 60s
       max-retries: 1                                              # сеть и 5xx; ответ не по схеме повторяет шлюз
     masking: { enabled: true }                                    # для всех моделей, не отключается
@@ -364,7 +364,7 @@ ads:
 | --- | --- |
 | Вход | Ключ авторизации (Base64 от client\_id:client\_secret) → OAuth-токен на 30 минут, библиотека обновляет его сама. Или клиентский сертификат (`certificate`, `private-key`) |
 | Scope | `GIGACHAT_API_PERS` для отладки; в контуре — `GIGACHAT_API_B2B` или `GIGACHAT_API_CORP` |
-| TLS | Корневой сертификат Минцифры (`ca-certs`); `unsafe-ssl` — только локально |
+| TLS | Корневой сертификат Минцифры лежит в ресурсах ads-llm и подключается по умолчанию; свой — через (`ca-certs`); `unsafe-ssl` — только локально |
 | Модели | GigaChat-2 — гейт и интент; GigaChat-2-Max — судья, обогащение, агент; GigaChat-2-Pro — промежуточный вариант |
 | Эмбеддинги | EmbeddingsGigaR — вектор 2560; Embeddings — дешевле, вектор 1024 |
 | Структурированный ответ | Схема инструкцией в промпте; нативный вывод по схеме в библиотеке ещё в разработке |

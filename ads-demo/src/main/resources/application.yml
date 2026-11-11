@@ -31,7 +31,7 @@ ads:
       auth-url: ${GIGACHAT_AUTH_URL:https://ngw.devices.sberbank.ru:9443/api/v2/oauth}
       scope: ${GIGACHAT_SCOPE:GIGACHAT_API_PERS}
       credentials: ${GIGACHAT_CREDENTIALS:}          # ключ авторизации; локально — в .env
-      ca-certs: ${GIGACHAT_CA_CERTS:}                # russian_trusted_root_ca.cer
+      ca-certs: ${GIGACHAT_CA_CERTS:classpath:certs/russian_trusted_root_ca.cer}   # корневой сертификат Минцифры из ресурсов ads-llm
       certificate: ${GIGACHAT_CERTIFICATE:}          # вход по сертификату вместо ключа
       private-key: ${GIGACHAT_PRIVATE_KEY:}
       read-timeout: 60s

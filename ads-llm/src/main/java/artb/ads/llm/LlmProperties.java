@@ -88,8 +88,11 @@ public class LlmProperties {
         private String scope = "GIGACHAT_API_PERS";
         /** Ключ авторизации из личного кабинета (Base64 от client_id:client_secret). */
         private String credentials;
-        /** Корневой сертификат Минцифры (PEM, путь или file:/classpath:); без него JVM не доверяет GigaChat. */
-        private String caCerts;
+        /**
+         * Корневой сертификат Минцифры (PEM): classpath:, file: или путь. По умолчанию — сертификат
+         * из ресурсов ads-llm; без него JVM не доверяет сертификатам GigaChat.
+         */
+        private String caCerts = "classpath:certs/russian_trusted_root_ca.cer";
         /** Клиентский сертификат и ключ (PEM) — вместо ключа авторизации, если так выдан доступ. */
         private String certificate;
         private String privateKey;

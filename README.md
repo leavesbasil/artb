@@ -44,9 +44,9 @@ JSON-схему GigaChat API в запросе не принимает: шлюз
 
 В [личном кабинете GigaChat API](https://developers.sber.ru/studio) создайте проект GigaChat API и скопируйте **ключ авторизации** (Authorization key — Base64 от `client_id:client_secret`). Для физлица scope — `GIGACHAT_API_PERS`, для юрлица — `GIGACHAT_API_B2B` или `GIGACHAT_API_CORP`.
 
-### 2. Скачайте корневой сертификат Минцифры
+### 2. Корневой сертификат Минцифры
 
-Сертификаты GigaChat выпущены российским УЦ, которому JVM по умолчанию не доверяет. Скачайте [russian_trusted_root_ca.cer](https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer) и сохраните, например, в `~/certs/`.
+Сертификаты GigaChat выпущены российским УЦ, которому JVM по умолчанию не доверяет. [Корневой сертификат Минцифры](https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer) лежит в ресурсах `ads-llm` — `ads-llm/src/main/resources/certs/russian_trusted_root_ca.cer` — и подключается по умолчанию (`classpath:certs/russian_trusted_root_ca.cer`). Скачивать ничего не нужно; `GIGACHAT_CA_CERTS` задают, только если в контуре свой УЦ.
 
 ### 3. Заполните `.env`
 
@@ -57,7 +57,6 @@ cp example.env .env
 ```properties
 GIGACHAT_CREDENTIALS=<ключ авторизации>
 GIGACHAT_SCOPE=GIGACHAT_API_PERS
-GIGACHAT_CA_CERTS=/Users/<вы>/certs/russian_trusted_root_ca.cer
 ```
 
 `.env` в `.gitignore`. Его читают демо (`spring.config.import`) и прогон golden set; переменные окружения с теми же именами имеют приоритет.
@@ -69,7 +68,7 @@ set -a; source .env; set +a
 ```
 
 ```bash
-curl -s --cacert "$GIGACHAT_CA_CERTS" https://ngw.devices.sberbank.ru:9443/api/v2/oauth -H "Authorization: Basic $GIGACHAT_CREDENTIALS" -H "RqUID: $(uuidgen)" -H 'Content-Type: application/x-www-form-urlencoded' -d "scope=$GIGACHAT_SCOPE"
+curl -s --cacert ads-llm/src/main/resources/certs/russian_trusted_root_ca.cer https://ngw.devices.sberbank.ru:9443/api/v2/oauth -H "Authorization: Basic $GIGACHAT_CREDENTIALS" -H "RqUID: $(uuidgen)" -H 'Content-Type: application/x-www-form-urlencoded' -d "scope=$GIGACHAT_SCOPE"
 ```
 
 В ответе — `access_token` и `expires_at`.
@@ -80,7 +79,7 @@ curl -s --cacert "$GIGACHAT_CA_CERTS" https://ngw.devices.sberbank.ru:9443/api/v
 | --- | --- | --- |
 | `GIGACHAT_CREDENTIALS` | — | Ключ авторизации |
 | `GIGACHAT_SCOPE` | `GIGACHAT_API_PERS` | Scope доступа |
-| `GIGACHAT_CA_CERTS` | — | Корневой сертификат (PEM) |
+| `GIGACHAT_CA_CERTS` | `classpath:certs/russian_trusted_root_ca.cer` | Корневой сертификат (PEM): `classpath:`, `file:` или путь |
 | `GIGACHAT_CERTIFICATE`, `GIGACHAT_PRIVATE_KEY` | — | Вход по клиентскому сертификату вместо ключа |
 | `GIGACHAT_BASE_URL` | `https://api.giga.chat/v1/` | Адрес API (в контуре — свой) |
 | `GIGACHAT_AUTH_URL` | `https://ngw.devices.sberbank.ru:9443/api/v2/oauth` | Адрес OAuth |
@@ -98,7 +97,7 @@ curl -s --cacert "$GIGACHAT_CA_CERTS" https://ngw.devices.sberbank.ru:9443/api/v
 | Симптом | Причина и что делать |
 | --- | --- |
 | Демо не стартует: «не задан ключ авторизации» | Нет `GIGACHAT_CREDENTIALS`: заполните `.env` (шаг 3) |
-| `PKIX path building failed` | JVM не доверяет сертификату: укажите `GIGACHAT_CA_CERTS` (шаг 2) |
+| `PKIX path building failed` | JVM не доверяет сертификату: проверьте, что `GIGACHAT_CA_CERTS` не задан пустым или не указывает на другой файл (шаг 2) |
 | 401 от OAuth | Неверный ключ или scope не совпадает с проектом в личном кабинете |
 | 402 Payment Required | Нет пакета токенов на модель. Чаще всего — на эмбеддинги: у ключа физлица они платные. Купите пакет или запустите с `ADS_EMBEDDING_PROVIDER=hashing` (golden set — `-Pembedding=hashing`) |
 | 404 / «model not found» | Модель недоступна для вашего scope: сверьте имена с `GET /models` |

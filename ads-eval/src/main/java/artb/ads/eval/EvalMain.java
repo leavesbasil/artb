@@ -151,7 +151,9 @@ public final class EvalMain {
         if (System.getenv("GIGACHAT_SCOPE") != null) {
             g.setScope(System.getenv("GIGACHAT_SCOPE"));
         }
-        g.setCaCerts(System.getenv("GIGACHAT_CA_CERTS"));
+        if (System.getenv("GIGACHAT_CA_CERTS") != null && !System.getenv("GIGACHAT_CA_CERTS").isBlank()) {
+            g.setCaCerts(System.getenv("GIGACHAT_CA_CERTS"));   // иначе — сертификат из ресурсов ads-llm
+        }
         if (baseUrl != null) {
             g.setBaseUrl(baseUrl);
         }

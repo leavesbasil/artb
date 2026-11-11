@@ -194,6 +194,20 @@ class GigaChatClientsTest {
     }
 
     @Test
+    void bundledRootCertificateIsTheDefault() throws Exception {
+        String location = new LlmProperties().getGigachat().getCaCerts();
+        var resource = new org.springframework.core.io.DefaultResourceLoader().getResource(location);
+
+        assertThat(location).isEqualTo("classpath:certs/russian_trusted_root_ca.cer");
+        assertThat(resource.exists()).isTrue();
+        try (var in = resource.getInputStream()) {
+            var cert = (java.security.cert.X509Certificate) java.security.cert.CertificateFactory.getInstance("X.509")
+                    .generateCertificate(in);
+            assertThat(cert.getSubjectX500Principal().getName()).contains("Russian Trusted Root CA");
+        }
+    }
+
+    @Test
     void missingCredentialsFailWithClearMessage() {
         LlmProperties props = props();
         props.getGigachat().setCredentials("");
