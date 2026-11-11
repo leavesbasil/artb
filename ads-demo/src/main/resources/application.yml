@@ -1,6 +1,10 @@
 spring:
   application:
     name: artb-ads
+  config:
+    # Локальные секреты (GIGACHAT_CREDENTIALS=...) — в .env в корне репозитория; файл в .gitignore.
+    # bootRun запускается из ads-demo, поэтому смотрим и на уровень выше.
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
   datasource:
     url: jdbc:postgresql://localhost:5433/ads
     username: ads
@@ -14,32 +18,36 @@ server:
 
 ads:
   llm:
-    # Прод: GigaChat внутри контура через официальный прокси gpt2giga (OpenAI API → GigaChat API).
-    # Ключ авторизации GigaChat живёт в gpt2giga; приложение знает только его адрес и ключ.
-    # ID моделей зависят от поставки в контуре — переопределяются переменными окружения.
-    default-stage: { provider: internal, model: "${ADS_LLM_FAST_MODEL:GigaChat-2-Lite}" }     # гейт, интент
+    # GigaChat API напрямую (библиотека spring-ai-gigachat): OAuth-токен по ключу авторизации,
+    # обновление токена, TLS с корневым сертификатом Минцифры. Для отладки — публичный API
+    # с ключом физлица и только синтетические данные; в контуре — свой base-url и ключ или сертификат.
+    default-stage: { provider: gigachat, model: "${ADS_LLM_FAST_MODEL:GigaChat-2}" }        # гейт, интент
     stages:
-      judge: { provider: internal, model: "${ADS_LLM_STRONG_MODEL:GigaChat-2-Max}" }
-      ingestion: { provider: internal, model: "${ADS_LLM_STRONG_MODEL:GigaChat-2-Max}" }
-      agent: { provider: internal, model: "${ADS_LLM_STRONG_MODEL:GigaChat-2-Max}" }
-    internal:
-      # 8090 — порт gpt2giga по умолчанию; совпадает с llm-cli-proxy, локально вместе их не запустить.
-      base-url: ${ADS_LLM_BASE_URL:http://localhost:8090/v1}
-      api-key: ${ADS_LLM_API_KEY:none}
-      timeout: 30s
-      max-retries: 2
-      # Схема инструкцией в промпте, пока не проверено, что gpt2giga переводит OpenAI json_schema
-      # в структурированный вывод GigaChat. Ответ всё равно проверяется по схеме, с одним повтором.
-      native-schema: false
+      judge: { provider: gigachat, model: "${ADS_LLM_STRONG_MODEL:GigaChat-2-Max}" }
+      ingestion: { provider: gigachat, model: "${ADS_LLM_STRONG_MODEL:GigaChat-2-Max}" }
+      agent: { provider: gigachat, model: "${ADS_LLM_STRONG_MODEL:GigaChat-2-Max}" }
+    gigachat:
+      base-url: ${GIGACHAT_BASE_URL:https://api.giga.chat/v1/}
+      auth-url: ${GIGACHAT_AUTH_URL:https://ngw.devices.sberbank.ru:9443/api/v2/oauth}
+      scope: ${GIGACHAT_SCOPE:GIGACHAT_API_PERS}
+      credentials: ${GIGACHAT_CREDENTIALS:}          # ключ авторизации; локально — в .env
+      ca-certs: ${GIGACHAT_CA_CERTS:}                # russian_trusted_root_ca.cer
+      certificate: ${GIGACHAT_CERTIFICATE:}          # вход по сертификату вместо ключа
+      private-key: ${GIGACHAT_PRIVATE_KEY:}
+      read-timeout: 60s
+      max-retries: 1
+    # JSON-схему GigaChat API не принимает: шлюз передаёт её инструкцией в промпте и проверяет ответ.
     masking:
       enabled: true
     embedding:
-      provider: internal
+      provider: gigachat
       model: ${ADS_EMBEDDING_MODEL:EmbeddingsGigaR}   # вектор 2560; колонка vector без фиксированной размерности
   catalog:
-    synthetic-count: ${ADS_SYNTHETIC_COUNT:0}
+    # 17 базовых синтетических продуктов (эмбеддинги платные — больше без нужды не заливаем).
+    # Заливаются только в пустую базу; с реальным каталогом — ADS_SYNTHETIC_COUNT=0.
+    synthetic-count: ${ADS_SYNTHETIC_COUNT:17}
   matching:
-    deadline: 2500ms
+    deadline: ${ADS_MATCHING_DEADLINE:2500ms}   # на GigaChat не замерен
   delivery:
     token-secret: ${ADS_TOKEN_SECRET:change-me-in-prod}
     offer-ttl: 30s
@@ -50,8 +58,8 @@ ads:
       client-clean: []
 
 ---
-# Отладка через llm-cli-proxy (OpenAI-совместимый прокси к CLI, порт 8090). Только синтетические данные.
-# Приложение о CLI не знает: меняется лишь адрес сервера и имена моделей.
+# Отладка через llm-cli-proxy (OpenAI-совместимый прокси к CLI, порт 8090). Сейчас не используется:
+# основной путь — GigaChat API. Только синтетические данные.
 spring.config.activate.on-profile: claude
 ads:
   llm:

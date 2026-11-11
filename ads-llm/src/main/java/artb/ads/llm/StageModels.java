@@ -8,20 +8,25 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
 import artb.ads.llm.LlmProperties.StageModel;
+import artb.ads.llm.gigachat.GigaChatClients;
 import artb.ads.llm.recording.RecordingChatModel;
 
 /**
- * Создаёт и кэширует {@link ChatModel} для каждого этапа по конфигу. Приложение знает только
- * OpenAI-совместимый протокол: в проде это сервер внутри контура, при отладке — локальный
- * llm-cli-proxy поверх Claude Code CLI или Qwen Code CLI.
+ * Создаёт и кэширует {@link ChatModel} для каждого этапа по конфигу. Провайдеры:
+ * <ul>
+ *   <li>{@code gigachat} — GigaChat API напрямую (основной);</li>
+ *   <li>{@code internal} — любой OpenAI-совместимый сервер, в том числе llm-cli-proxy для отладки на CLI.</li>
+ * </ul>
  */
 public class StageModels {
 
     private final LlmProperties props;
+    private final GigaChatClients gigaChat;
     private final Map<String, ChatModel> cache = new ConcurrentHashMap<>();
 
-    public StageModels(LlmProperties props) {
+    public StageModels(LlmProperties props, GigaChatClients gigaChat) {
         this.props = props;
+        this.gigaChat = gigaChat;
     }
 
     public ChatModel forStage(LlmStage stage) {
@@ -34,10 +39,15 @@ public class StageModels {
     }
 
     private ChatModel create(StageModel sm) {
-        if (!"internal".equals(sm.provider())) {
-            throw new IllegalArgumentException("Неизвестный провайдер модели: " + sm.provider()
-                    + ". Поддерживается internal — любой OpenAI-совместимый сервер (для CLI — llm-cli-proxy)");
-        }
+        return switch (sm.provider()) {
+            case "gigachat" -> gigaChat.chatModel(sm.model());
+            case "internal" -> openAiCompatible(sm);
+            default -> throw new IllegalArgumentException("Неизвестный провайдер модели: " + sm.provider()
+                    + ". Поддерживаются gigachat и internal (OpenAI-совместимый сервер, для CLI — llm-cli-proxy)");
+        };
+    }
+
+    private ChatModel openAiCompatible(StageModel sm) {
         LlmProperties.Internal in = props.getInternal();
         OpenAiChatModel model = OpenAiChatModel.builder()
                 .options(OpenAiChatOptions.builder()

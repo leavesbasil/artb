@@ -38,7 +38,7 @@ class DefaultLlmGatewayTest {
     }
 
     private static StageModels fixed(ChatModel model) {
-        return new StageModels(new LlmProperties()) {
+        return new StageModels(new LlmProperties(), null) {
             @Override
             public ChatModel forStage(LlmStage stage) {
                 return model;

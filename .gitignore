@@ -4,7 +4,9 @@ out/
 .idea/
 *.iml
 .DS_Store
-/.env
+.env
+*.env
+!example.env
 
 # Eclipse / Buildship
 .project

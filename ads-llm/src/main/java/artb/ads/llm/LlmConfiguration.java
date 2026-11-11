@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import artb.ads.llm.embedding.HashingTextEmbedder;
 import artb.ads.llm.embedding.SpringAiTextEmbedder;
 import artb.ads.llm.embedding.TextEmbedder;
+import artb.ads.llm.gigachat.GigaChatClients;
 import artb.ads.llm.masking.PiiMasker;
 import artb.ads.llm.masking.RegexPiiMasker;
 
@@ -24,8 +25,13 @@ public class LlmConfiguration {
     }
 
     @Bean
-    StageModels stageModels(LlmProperties props) {
-        return new StageModels(props);
+    GigaChatClients gigaChatClients(LlmProperties props) {
+        return new GigaChatClients(props.getGigachat());
+    }
+
+    @Bean
+    StageModels stageModels(LlmProperties props, GigaChatClients gigaChat) {
+        return new StageModels(props, gigaChat);
     }
 
     @Bean
@@ -36,10 +42,11 @@ public class LlmConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    TextEmbedder textEmbedder(LlmProperties props) {
+    TextEmbedder textEmbedder(LlmProperties props, GigaChatClients gigaChat) {
         LlmProperties.Embedding e = props.getEmbedding();
         return switch (e.getProvider()) {
             case "hashing" -> new HashingTextEmbedder(e.getDimensions());
+            case "gigachat" -> new SpringAiTextEmbedder(gigaChat.embeddingModel(e.getModel()), "gigachat:" + e.getModel());
             case "internal" -> new SpringAiTextEmbedder(OpenAiEmbeddingModel.builder()
                     .options(OpenAiEmbeddingOptions.builder()
                             .baseUrl(props.getInternal().getBaseUrl())

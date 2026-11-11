@@ -56,7 +56,7 @@ Nov 9, 2026 · @Vasily
 | Банковский домен | Стоп-темы, одобренные тексты, grounding после клика, маскирование персональных данных |
 | Стек: Java 17–21, Spring Boot | Java 21 (виртуальные потоки), Spring Boot, Spring AI, Gradle |
 | Любые модели | Модель назначается каждому этапу в конфиге |
-| Локальная отладка и тесты | Локальный OpenAI-совместимый прокси llm-cli-proxy поверх Qwen CLI и Claude CLI; приложение о CLI не знает |
+| Локальная отладка и тесты | Локальный OpenAI-совместимый прокси llm-cli-proxy поверх Qwen CLI и Claude CLI; приложение о CLI не знает. Сейчас не используется: отладка идёт на публичном GigaChat API |
 
 ## Архитектура
 
@@ -246,7 +246,7 @@ stateDiagram-v2
 
 **После клика по вопросу** диалог продолжается, и агент отвечает о продукте. Ставки и условия он берёт строго из одобренного описания кампании: оно передаётся агенту как grounding-контекст с запретом дополнять цифры.
 
-**Персональные данные (152-ФЗ).** Сегменты клиента в LLM не уходят. Перед любой моделью текст диалога проходит маскирование (ФИО, телефоны, номера карт и счетов, паспорт). В проде используются только модели внутри контура, но маскирование включено и для них и не отключается. Внешние модели через llm-cli-proxy (Claude CLI, Qwen CLI) допустимы только в тестах и локальной отладке на синтетических данных.
+**Персональные данные (152-ФЗ).** Сегменты клиента в LLM не уходят. Перед любой моделью текст диалога проходит маскирование (ФИО, телефоны, номера карт и счетов, паспорт). В проде используются только модели внутри контура, но маскирование включено и для них и не отключается. Модели вне контура — публичный GigaChat API и llm-cli-proxy (Claude CLI, Qwen CLI) — допустимы только в тестах и локальной отладке на синтетических данных.
 
 ## Модель данных
 
@@ -311,115 +311,80 @@ ad_event (
 
 ## Подключение LLM
 
-Приложение знает один протокол — OpenAI Chat Completions. Куда он ведёт, решает конфиг: в проде — GigaChat внутри контура через официальный прокси gpt2giga, при отладке — локальный `llm-cli-proxy` поверх Claude Code CLI или Qwen Code CLI. Код пайплайна от этого не меняется.
+Все этапы подбора, обогащение кампаний, агент демо и эмбеддинги ходят в GigaChat API напрямую — через библиотеку [spring-ai-gigachat](https://github.com/ai-forever/spring-ai-gigachat) от команды GigaChat. Провайдер задаётся конфигом на каждый этап: `gigachat` — основной, `internal` — любой OpenAI-совместимый сервер (gpt2giga, vLLM, `llm-cli-proxy`); сейчас используется только `gigachat`.
 
 ```mermaid
 flowchart LR
-  subgraph app["ads-demo / ads-matching"]
-    ST[Этап пайплайна] --> GW[LlmGateway:<br/>маскирование ПДн, JSON-схема] --> SM[StageModels:<br/>модель этапа]
+  subgraph app["ads-demo / ads-eval"]
+    ST[Этап пайплайна] --> GW[DefaultLlmGateway:<br/>маскирование ПДн,<br/>JSON-схема в промпте] --> SM[StageModels →<br/>GigaChatClients]
   end
-  SM -- OpenAI Chat Completions --> BASE{{base-url}}
-  BASE -- прод --> G2G[gpt2giga] --> GC[GigaChat API<br/>внутри контура]
-  BASE -- отладка --> PX[llm-cli-proxy<br/>127.0.0.1:8090]
-  PX --> CC[claude CLI]
-  PX --> QC[qwen CLI]
+  SM == "provider: gigachat" ==> GC[GigaChat API<br/>OAuth-токен на 30 мин<br/>GigaChat-2 · GigaChat-2-Max<br/>EmbeddingsGigaR]
+  SM -. "provider: internal<br/>(не используется)" .-> PX[llm-cli-proxy :8090<br/>Claude / Qwen CLI]
 ```
 
-Прод и отладка отличаются только `base-url` и именами моделей; всё знание о CLI живёт в отдельном приложении `llm-cli-proxy`.
+Отладка и контур отличаются адресами API и OAuth, scope и способом входа; код пайплайна тот же.
 
 ### Как приложение вызывает модель
 
 1. Этап (гейт, интент, судья, обогащение, агент демо) вызывает `LlmGateway.call(этап, системный промпт, текст, КлассОтвета.class)`.
 2. `DefaultLlmGateway` маскирует персональные данные в тексте и строит JSON-схему по классу ответа (`BeanOutputConverter` из Spring AI).
-3. `StageModels` берёт модель этапа из конфига и отдаёт `OpenAiCompatibleChatModel` — обёртку над `OpenAiChatModel` из Spring AI.
-4. Схема уходит в запросе как `response_format: json_schema`. Если сервер это не поддерживает, `native-schema: false` — и схема добавляется инструкцией в промпт.
+3. `StageModels` берёт модель этапа из конфига. Для `gigachat` это `GigaChatModel` из spring-ai-gigachat поверх общего на приложение `GigaChatApi`.
+4. GigaChat API не принимает `response_format: json_schema`, поэтому схема добавляется инструкцией в промпт. Для `internal` с поддержкой схемы (`native-schema: true`) она уходит в `response_format`.
 5. Ответ проверяется по схеме; не прошёл — один повтор с текстом ошибки. Ошибка после повтора даёт на ходе `no_ad_reason = ERROR`.
-
-Модель в опциях вызова указывается явно: опции без модели Spring AI дополняет своей моделью по умолчанию (`gpt-5-mini`), а не моделью клиента. Это поймал тест совместимости прокси.
 
 ### Конфигурация
 
 ```yaml
 ads:
   llm:
-    default-stage: { provider: internal, model: GigaChat-2-Lite }   # гейт, интент; ID — по поставке
+    default-stage: { provider: gigachat, model: GigaChat-2 }        # гейт, интент
     stages:
-      judge:     { provider: internal, model: GigaChat-2-Max }
-      ingestion: { provider: internal, model: GigaChat-2-Max }
-      agent:     { provider: internal, model: GigaChat-2-Max }
-    internal:
-      base-url: ${ADS_LLM_BASE_URL}       # gpt2giga внутри контура
-      api-key: ${ADS_LLM_API_KEY}         # ключ gpt2giga, не GigaChat
-      timeout: 30s
-      max-retries: 2
-      native-schema: false                # схема в промпте, пока не проверен json_schema через gpt2giga
-    masking: { enabled: true }            # для всех моделей, не отключается
-    embedding: { provider: internal, model: EmbeddingsGigaR }   # в прототипе: hashing
-    recording: { mode: off }              # record | replay — в тестах и golden set
----
-spring.config.activate.on-profile: claude   # отладка, только синтетические данные
-ads.llm:
-  default-stage: { provider: internal, model: claude/haiku }
-  stages:
-    judge:     { provider: internal, model: claude/sonnet }
-    ingestion: { provider: internal, model: claude/sonnet }
-    agent:     { provider: internal, model: claude/haiku }
-  internal: { base-url: http://localhost:8090/v1, timeout: 180s, max-retries: 0, native-schema: true }
+      judge:     { provider: gigachat, model: GigaChat-2-Max }
+      ingestion: { provider: gigachat, model: GigaChat-2-Max }
+      agent:     { provider: gigachat, model: GigaChat-2-Max }
+    gigachat:
+      base-url: https://api.giga.chat/v1/                         # в контуре — свой
+      auth-url: https://ngw.devices.sberbank.ru:9443/api/v2/oauth
+      scope: GIGACHAT_API_PERS                                    # в контуре — B2B или CORP
+      credentials: ${GIGACHAT_CREDENTIALS}                        # ключ авторизации; локально — .env
+      ca-certs: ${GIGACHAT_CA_CERTS}                              # корневой сертификат Минцифры
+      read-timeout: 60s
+      max-retries: 1                                              # сеть и 5xx; ответ не по схеме повторяет шлюз
+    masking: { enabled: true }                                    # для всех моделей, не отключается
+    embedding: { provider: gigachat, model: EmbeddingsGigaR }
+    recording: { mode: off }                                      # record | replay — в тестах и golden set
 ```
 
-| Параметр | Прод | Отладка через прокси | Почему |
+| Профиль | Чат | Эмбеддинги | Статус |
 | --- | --- | --- | --- |
-| `base-url` | gpt2giga перед GigaChat внутри контура | `http://localhost:8090/v1` | Единственное, чем отличаются окружения |
-| Модели | GigaChat 2 Lite и GigaChat 2 Max (ID — по поставке) | `claude/haiku`, `claude/sonnet`, `qwen` | Прокси выбирает CLI по имени |
-| `timeout` | 30 с | 180 с | Вызов CLI — секунды, плюс один повтор в прокси |
-| `max-retries` | 2 | 0 | Зависший вызов повторяет прокси; повтор SDK удвоил бы дорогой вызов |
-| Дедлайн подбора | 2500 мс | Выключен | Подбор через CLI занимает 15–25 с |
-| Данные | Реальные, с маскированием | Только синтетические | CLI ходят к внешним моделям |
-| `native-schema` | false, пока не проверено на GigaChat | true | Claude CLI гарантирует схему сам; у GigaChat структурированный вывод есть, но перевод OpenAI json\_schema через gpt2giga не проверяли |
+| без профиля | GigaChat API: GigaChat-2, GigaChat-2-Max | EmbeddingsGigaR | Основной; на публичном API — только синтетические данные |
+| `claude` | `llm-cli-proxy`: claude/haiku, claude/sonnet | хэширующие, 384 | Сохранён, не используется |
+| `local` | `llm-cli-proxy`: qwen | хэширующие, 384 | Сохранён, не используется |
 
-### GigaChat внутри контура
+### GigaChat API
 
-В проде модели — GigaChat внутри контура банка. Его API совместим с OpenAI только частично, а токен доступа действует 30 минут ([Сбер: совместимость с OpenAI](https://developers.sber.ru/docs/ru/gigachat/guides/compatible-openai)). Поэтому перед GigaChat ставится официальный прокси [gpt2giga](https://developers.sber.ru/docs/ru/gigachain/tools/utilities/gpttogiga-proxy-server): он принимает OpenAI Chat Completions и Embeddings и переводит их в GigaChat API. Для приложения это тот же OpenAI-совместимый сервер, что и `llm-cli-proxy` при отладке: код пайплайна не меняется.
+Библиотека `chat.giga:spring-ai-gigachat` 2.0.2 собрана под Spring Boot 4.1 и Spring AI 2.0 — те же версии, что у прототипа. Автоконфигурацию не используем: `GigaChatClients` создаёт один `GigaChatApi` при первом вызове и по `GigaChatModel` на каждую модель этапа.
 
-| Вопрос | Решение |
+| Что | Как устроено |
 | --- | --- |
-| Протокол | Приложение → OpenAI API → gpt2giga → GigaChat API. Приложение задаёт только адрес и ключ gpt2giga |
-| Авторизация GigaChat | Ключ авторизации и scope настраиваются в gpt2giga и в приложение не попадают |
-| Модели этапов | Гейт и интент — быстрая GigaChat 2 Lite; судья, обогащение и агент — GigaChat 2 Max. GigaChat 3 Ultra — кандидат для судьи, если есть в поставке ([модели GigaChat](https://developers.sber.ru/docs/ru/gigachat/models)). Точные ID — по поставке в контуре |
-| JSON-схема | gpt2giga заявляет структурированный вывод в той мере, в какой его поддерживает GigaChat API, но перевод OpenAI `json_schema` мы не проверяли. Пока `native-schema: false`: схема инструкцией в промпте, проверка ответа и один повтор — это работает с любой моделью |
-| Эмбеддинги | `embedding.provider: internal` через тот же gpt2giga. [EmbeddingsGigaR](https://developers.sber.ru/docs/ru/gigachat/models/embeddings-giga-r) — вектор 2560, контекст 4096 токенов; колонка `vector` без фиксированной размерности это допускает |
-| Персональные данные | Маскирование остаётся включённым, хотя модель внутри контура |
-| Локальный запуск | У gpt2giga и `llm-cli-proxy` один порт по умолчанию — 8090; чтобы запустить оба, одному нужно задать другой порт (у нашего — `PROXY_PORT`) |
-| Альтернатива | [LiteLLM](https://docs.litellm.ai/docs/providers/gigachat) как OpenAI-совместимый прокси с провайдером GigaChat |
+| Вход | Ключ авторизации (Base64 от client\_id:client\_secret) → OAuth-токен на 30 минут, библиотека обновляет его сама. Или клиентский сертификат (`certificate`, `private-key`) |
+| Scope | `GIGACHAT_API_PERS` для отладки; в контуре — `GIGACHAT_API_B2B` или `GIGACHAT_API_CORP` |
+| TLS | Корневой сертификат Минцифры (`ca-certs`); `unsafe-ssl` — только локально |
+| Модели | GigaChat-2 — гейт и интент; GigaChat-2-Max — судья, обогащение, агент; GigaChat-2-Pro — промежуточный вариант |
+| Эмбеддинги | EmbeddingsGigaR — вектор 2560; Embeddings — дешевле, вектор 1024 |
+| Структурированный ответ | Схема инструкцией в промпте; нативный вывод по схеме в библиотеке ещё в разработке |
+| Повторы | Сетевые ошибки и 5xx — `max-retries` (1); ответ не по схеме — шлюз, один раз |
+| Без ключа | Демо не стартует с ошибкой «не задан ключ авторизации»; профили без GigaChat ключ не требуют |
 
-Перед запуском нужно прогнать golden set на GigaChat в обоих режимах схемы и заново подобрать пороги: сейчас они настроены на Claude haiku. Для ранней проверки подойдёт gpt2giga с публичным GigaChat API на синтетических диалогах — всё так же через `ADS_LLM_BASE_URL`.
+Публичный GigaChat API находится вне контура банка, поэтому через него идут только синтетические диалоги и каталог. В контуре меняются `base-url`, `auth-url`, scope и способ входа. Перед запуском нужно прогнать golden set на GigaChat и заново подобрать пороги: сейчас они настроены на Claude haiku и хэширующих эмбеддингах.
 
 ### llm-cli-proxy
 
-Отдельное Spring Boot приложение (модуль `llm-cli-proxy`), слушает только `127.0.0.1:8090` и при необходимости требует ключ (`PROXY_API_KEY`). Для приложения это обычный OpenAI-совместимый сервер.
-
-| Метод | Путь | Что делает |
-| --- | --- | --- |
-| POST | `/v1/chat/completions` | System и developer → системный промпт CLI; одно сообщение user — запрос как есть, переписка — транскриптом; `response_format: json_schema` → схема. Ответ — `chat.completion` с `usage` |
-| GET | `/v1/models` | Бэкенды и псевдонимы |
-
-Модель выбирается именем: `claude/<модель>`, `qwen[/<модель>]` или псевдоним из `proxy.aliases` (`fast` → `claude/haiku`, `strong` → `claude/sonnet`). Потоковые ответы, инструменты и нетекстовые части сообщений не поддерживаются — 400 в формате ошибки OpenAI. Ошибка CLI — 502, зависание после повтора — 504.
-
-Каждый вызов — отдельный процесс в пустой временной папке, не больше 4 одновременных процессов на CLI. Таймаут попытки 60 с; CLI изредка зависает (около 2 вызовов из 100), поэтому при зависании делается один повтор.
-
-|  | Claude Code CLI | Qwen Code CLI |
-| --- | --- | --- |
-| Запуск | `claude -p --output-format json`, запрос в stdin | `qwen -o json -p <запрос>` |
-| Системный промпт | `--system-prompt`, заменяет промпт агента | Склеивается с запросом |
-| JSON-схема | `--json-schema`, ответ в `structured_output`; ключи `$schema` и `$id` убираются — валидатор CLI их не принимает | Добавляется в запрос, JSON вырезается из ответа |
-| Изоляция | `--tools "" --setting-sources "" --strict-mcp-config --disable-slash-commands --no-session-persistence`, без переменных `CLAUDECODE*` | Инструменты отключаются в настройках qwen, без `--yolo` |
-| Особенности | `--max-turns 2` (схема работает через внутренний инструмент), `--max-budget-usd 0.5` как предохранитель | Формат `-o json` меняется между версиями, разбор понимает оба |
-| Авторизация | Подписка пользователя машины | Один раз интерактивно |
-| Измерено | haiku 4–14 с на вызов; судья на sonnet 11–14 с и около $0.04 | Не проверено: qwen не установлен |
+Отдельное приложение остаётся в репозитории как запасной путь отладки без ключа GigaChat, но сейчас не используется. Это OpenAI-совместимый API на `127.0.0.1:8090` поверх Claude Code CLI и Qwen Code CLI: приложение подключается к нему провайдером `internal` в профилях `claude` и `local`. Настройка — в README.
 
 ### Эмбеддинги
 
-Прокси эмбеддинги не отдаёт. В прототипе их считает `HashingTextEmbedder` в процессе приложения: хэширование слов, коротких основ и символьных триграмм, 384 измерения. Он ловит лексику с учётом русских окончаний, но не смысл. В проде — EmbeddingsGigaR через тот же gpt2giga, если модель есть в поставке (`embedding.provider: internal`). Колонка `vector` без фиксированной размерности позволяет сменить модель без миграции схемы, но каталог при этом нужно переиндексировать: поиск идёт только по векторам той же модели (`embedding_model`). Отдельной команды переиндексации в прототипе нет — её нужно добавить до перехода на EmbeddingsGigaR.
+По умолчанию — EmbeddingsGigaR через GigaChat API (`embedding.provider: gigachat`); в профилях с прокси — `HashingTextEmbedder` в процессе приложения (слова, основы, триграммы, 384 измерения). Колонка `vector` без фиксированной размерности, векторы помечены моделью (`embedding_model`), и поиск идёт только по векторам текущей модели. Команды переиндексации нет: синтетический каталог заливается только в пустую базу, поэтому при смене модели базу пересоздают.
 
 ### Запись и воспроизведение
 
@@ -481,16 +446,16 @@ ads.llm:
 1. Юнит-тесты без LLM: фильтр сегментов, правила частоты, жизненный цикл оффера, подпись токена, ранжировщик.
 2. Тесты этапов на записях (`replay`) — идут в CI.
 3. Тесты этапов на живом Claude CLI (`@Tag("llm-cli")`, включаются, если `claude` есть в PATH) — локально и для перезаписи.
-4. Тесты llm-cli-proxy: разбор вывода обоих CLI на реальных образцах JSON и совместимость с настоящим клиентом Spring AI OpenAI.
+4. Провайдер GigaChat — на фейковом сервере (OAuth, чат, эмбеддинги, повтор при ответе не по схеме). Тесты llm-cli-proxy: разбор вывода обоих CLI на реальных образцах JSON и совместимость с настоящим клиентом Spring AI OpenAI.
 5. Прогон golden set в модуле `ads-eval`: отчёт по метрикам и сравнение моделей (qwen, haiku, sonnet) на одном наборе.
 
 ## Состав прототипа и план работ
 
-Прототип — многомодульный Gradle-проект на Java 21 и Spring Boot. Локально поднимается так: Postgres + pgvector в docker-compose, llm-cli-proxy и приложение в профиле claude или `local`.
+Прототип — многомодульный Gradle-проект на Java 21 и Spring Boot. Локально поднимается так: Postgres + pgvector в docker-compose и приложение на GigaChat API с ключом в `.env`. Профили `claude` и `local` через `llm-cli-proxy` сохранены, но не используются.
 
 | Модуль | Содержимое |
 | --- | --- |
-| `ads-llm` | Назначение моделей этапам, `OpenAiCompatibleChatModel`, `RecordingChatModel`, маскирование персональных данных |
+| `ads-llm` | Назначение моделей этапам, клиент GigaChat API (GigaChatClients), `OpenAiCompatibleChatModel`, `RecordingChatModel`, маскирование персональных данных |
 | `ads-campaign` | Сущности кампаний, обогащение, валидация креативов, одобрение, админ-API |
 | `ads-targeting` | SegmentFilter (чёрный список), реестр сегментов, eligible set |
 | `ads-matching` | Гейт, интент, retrieval, судья, кэш сессии |
@@ -511,7 +476,7 @@ ads.llm:
 
 ## Результаты прототипа
 
-Все шесть этапов реализованы 9 ноября 2026: 8 Gradle-модулей на Java 21, Spring Boot 4.1 и Spring AI 2.0, 49 тестов, включая интеграционные на Postgres + pgvector в Testcontainers. Инструкции по запуску — в `README.md` репозитория.
+Все шесть этапов реализованы 9 ноября 2026: 9 Gradle-модулей на Java 21, Spring Boot 4.1 и Spring AI 2.0, 63 теста (с прокси и провайдером GigaChat), включая интеграционные на Postgres + pgvector в Testcontainers. Инструкции по запуску — в `README.md` репозитория.
 
 **Golden set** — 32 диалога, все этапы на Claude haiku через CLI, каталог из 17 базовых продуктов:
 
@@ -545,7 +510,7 @@ ads.llm:
 - ошибка подбора ломала весь ход (500 вместо ответа агента) — теперь `ERROR` без рекламы;
 - совместимость Claude CLI: `$schema`, бюджет вызова, повтор при зависании (раздел «Подключение LLM»).
 
-**Не проверено:** профиль `local` с Qwen CLI (на машине нет `qwen`), качество и задержка на GigaChat (golden set на нём не прогонялся, пороги подобраны на Claude haiku), маскирование ФИО (регулярки их не ловят, нужен NER-сервис). В синтетическом каталоге варианты одного продукта почти одинаковы, поэтому топ-20 для судьи часто занимает один продукт.
+**Не проверено:** профиль `local` с Qwen CLI (на машине нет `qwen`); работа на живом GigaChat API — провайдер проверен только на фейковом сервере, golden set на GigaChat не прогонялся, пороги подобраны на Claude haiku и хэширующих эмбеддингах; маскирование ФИО (регулярки их не ловят, нужен NER-сервис). В синтетическом каталоге варианты одного продукта почти одинаковы, поэтому топ-20 для судьи часто занимает один продукт.
 
 ## Открытые вопросы и риски
 
@@ -556,7 +521,7 @@ ads.llm:
 - [ ] Какой дедлайн у рекламного слота на вашей поверхности и по какому правилу считается показ (площадь и время видимости)?
 - [ ] Сегменты бинарные. В прототипе только чёрный список сегментов, сегменты клиента из мока.
 - [ ] Кто размечает golden set со стороны бизнеса? Сейчас в нём 32 диалога из целевых 100–200.
-- [ ] Какая поставка GigaChat в контуре: версия, ID моделей (2 Lite, 2 Max, 3 Ultra), есть ли EmbeddingsGigaR и переводит ли gpt2giga OpenAI json\_schema в структурированный вывод GigaChat? От схемы зависит native-schema, а EmbeddingsGigaR заменит хэширующие эмбеддинги и позволит уменьшить `negativeMargin`.
+- [ ] Какая поставка GigaChat в контуре: адрес API и OAuth, scope, вход по ключу или сертификату, ID моделей, есть ли EmbeddingsGigaR? Сейчас приложение настроено на публичный API; на EmbeddingsGigaR нужно заново подобрать пороги и уменьшить `negativeMargin`.
 - [ ] Есть ли NER-сервис внутри контура для маскирования ФИО?
 
 | Риск | Чем снимаем |

@@ -31,6 +31,9 @@ import artb.ads.llm.LlmProperties.StageModel;
 import artb.ads.llm.LlmStage;
 import artb.ads.llm.StageModels;
 import artb.ads.llm.embedding.HashingTextEmbedder;
+import artb.ads.llm.embedding.SpringAiTextEmbedder;
+import artb.ads.llm.embedding.TextEmbedder;
+import artb.ads.llm.gigachat.GigaChatClients;
 import artb.ads.llm.masking.RegexPiiMasker;
 import artb.ads.matching.AdMatcher;
 import artb.ads.matching.CandidateRetriever;
@@ -49,36 +52,45 @@ import artb.ads.targeting.EligibleSetService;
 import artb.ads.targeting.MockClientSegmentsProvider;
 
 /**
- * Прогон golden set без базы: базовый каталог в памяти, модели — через OpenAI-совместимый сервер
- * (по умолчанию локальный llm-cli-proxy на 8090 с Claude CLI).
+ * Прогон golden set без базы: базовый каталог в памяти, модели — GigaChat API (ключ в GIGACHAT_CREDENTIALS)
+ * или любой OpenAI-совместимый сервер ({@code -Pprovider=internal}, например llm-cli-proxy).
  * Каждый кейс — отдельная сессия без лимитов частоты. Ответы моделей пишутся в кассеты,
  * повторный прогон с теми же промптами бесплатный.
  */
 public final class EvalMain {
 
     public static void main(String[] args) throws Exception {
-        String baseUrl = System.getProperty("eval.baseUrl", "http://localhost:8090/v1");
-        String model = System.getProperty("eval.model", "claude/haiku");
-        String judgeModel = System.getProperty("eval.judgeModel", model);
+        String provider = System.getProperty("eval.provider", "gigachat");
+        boolean gigachat = provider.equals("gigachat");
+        String baseUrl = System.getProperty("eval.baseUrl", gigachat ? null : "http://localhost:8090/v1");
+        String model = System.getProperty("eval.model", gigachat ? "GigaChat-2" : "claude/haiku");
+        String judgeModel = System.getProperty("eval.judgeModel", gigachat ? "GigaChat-2-Max" : model);
+        String embedding = System.getProperty("eval.embedding", gigachat ? "EmbeddingsGigaR" : "hashing");
         String recording = System.getProperty("eval.recording", "record");
         int parallelism = Integer.parseInt(System.getProperty("eval.parallelism", "4"));
         String only = System.getProperty("eval.only");
 
         LlmProperties llmProps = new LlmProperties();
-        llmProps.setDefaultStage(new StageModel("internal", model));
-        llmProps.getStages().put(LlmStage.JUDGE.key(), new StageModel("internal", judgeModel));
-        llmProps.getInternal().setBaseUrl(baseUrl);
-        llmProps.getInternal().setTimeout(Duration.ofSeconds(180));
-        llmProps.getInternal().setMaxRetries(0);
+        llmProps.setDefaultStage(new StageModel(provider, model));
+        llmProps.getStages().put(LlmStage.JUDGE.key(), new StageModel(provider, judgeModel));
+        if (gigachat) {
+            configureGigaChat(llmProps.getGigachat(), baseUrl);
+        } else {
+            llmProps.getInternal().setBaseUrl(baseUrl);
+            llmProps.getInternal().setTimeout(Duration.ofSeconds(180));
+            llmProps.getInternal().setMaxRetries(0);
+        }
         llmProps.getRecording().setMode(recording);
         llmProps.getRecording().setDir(Path.of("ads-eval/llm-cassettes"));
-        LlmGateway llm = new DefaultLlmGateway(new StageModels(llmProps), new RegexPiiMasker(), true);
+        GigaChatClients gigaChatClients = new GigaChatClients(llmProps.getGigachat());
+        LlmGateway llm = new DefaultLlmGateway(new StageModels(llmProps, gigaChatClients), new RegexPiiMasker(), true);
 
         Clock clock = Clock.systemUTC();
         TopicTaxonomy taxonomy = TaxonomyProvider.fromMigration();
         var repo = new InMemoryCampaignRepository();
         var index = new InMemoryIntentIndex();
-        var embedder = new HashingTextEmbedder(384);
+        TextEmbedder embedder = embedding.equals("hashing") ? new HashingTextEmbedder(384)
+                : new SpringAiTextEmbedder(gigaChatClients.embeddingModel(embedding), "gigachat:" + embedding);
         var campaigns = new CampaignService(repo, index, embedder, new EnrichmentService(llm), () -> taxonomy,
                 new CreativeValidator(), clock);
         Map<UUID, String> keyById = new HashMap<>();
@@ -99,8 +111,8 @@ public final class EvalMain {
                 new CandidateRetriever(index, embedder, props), new Judge(llm, props), new RelevancePriorityRanker(0.6),
                 FrequencyGuard.NONE, new CatalogSnapshot(repo, clock), repo, () -> taxonomy, new SessionCache(), props, clock);
 
-        System.out.printf("Golden set: %d кейсов, %s, модели %s (судья %s), запись %s%n",
-                cases.size(), baseUrl, model, judgeModel, recording);
+        System.out.printf("Golden set: %d кейсов, %s, модели %s (судья %s), эмбеддинги %s, запись %s%n",
+                cases.size(), gigachat ? "GigaChat API" : baseUrl, model, judgeModel, embedding, recording);
         ExecutorService pool = Executors.newFixedThreadPool(parallelism);
         List<Future<EvalResult>> futures = new ArrayList<>();
         for (GoldenCase gc : cases) {
@@ -119,6 +131,7 @@ public final class EvalMain {
         Map<String, String> models = new LinkedHashMap<>();
         models.put("gate/intent", model);
         models.put("judge", judgeModel);
+        models.put("embeddings", embedding);
         String report = EvalReport.render(results, models);
         Path out = Path.of("ads-eval/build/eval/report.md");
         Files.createDirectories(out.getParent());
@@ -126,6 +139,19 @@ public final class EvalMain {
         System.out.println();
         System.out.println(report);
         System.out.println("Отчёт: " + out.toAbsolutePath());
+    }
+
+    /** Ключ и сертификат — из окружения, как у демо: GIGACHAT_CREDENTIALS, GIGACHAT_SCOPE, GIGACHAT_CA_CERTS. */
+    private static void configureGigaChat(LlmProperties.GigaChat g, String baseUrl) {
+        g.setCredentials(System.getenv("GIGACHAT_CREDENTIALS"));
+        if (System.getenv("GIGACHAT_SCOPE") != null) {
+            g.setScope(System.getenv("GIGACHAT_SCOPE"));
+        }
+        g.setCaCerts(System.getenv("GIGACHAT_CA_CERTS"));
+        if (baseUrl != null) {
+            g.setBaseUrl(baseUrl);
+        }
+        g.setReadTimeout(Duration.ofSeconds(120));
     }
 
     private static EvalResult run(AdMatcher matcher, GoldenCase gc, Map<UUID, String> keyById) {

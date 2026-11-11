@@ -2,16 +2,16 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "ads-demo",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": [":ads-demo:bootRun"],
+      "port": 8080
+    },
+    {
       "name": "llm-cli-proxy",
       "runtimeExecutable": "./gradlew",
       "runtimeArgs": [":llm-cli-proxy:bootRun"],
       "port": 8090
-    },
-    {
-      "name": "ads-demo-claude",
-      "runtimeExecutable": "./gradlew",
-      "runtimeArgs": [":ads-demo:bootRun", "--args=--spring.profiles.active=claude"],
-      "port": 8080
     }
   ]
 }

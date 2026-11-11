@@ -10,7 +10,7 @@
 
 | Модуль | Что внутри |
 | --- | --- |
-| `ads-llm` | Назначение моделей этапам, `DefaultLlmGateway` (структурированный ответ, повтор при ошибке схемы), клиент OpenAI-совместимого сервера, запись и воспроизведение ответов, маскирование персональных данных, эмбеддинги |
+| `ads-llm` | Назначение моделей этапам, `DefaultLlmGateway` (структурированный ответ, повтор при ошибке схемы), клиент GigaChat API и OpenAI-совместимого сервера, запись и воспроизведение ответов, маскирование персональных данных, эмбеддинги |
 | `ads-campaign` | Каталог: кампании, креативы, интенты, таксономия тем; LLM-обогащение, одобрение, валидация креативов (ст. 28 ФЗ «О рекламе»); векторный индекс на pgvector; синтетический каталог; админ-API |
 | `ads-targeting` | Чёрный список бинарных сегментов (`SegmentFilter`), мок сегментов клиента, eligible set на сессию |
 | `ads-ranking` | `CandidateRanker` и прототипная реализация: порог τ, затем relevance × приоритет |
@@ -18,22 +18,132 @@
 | `ads-delivery` | Офферы с подписанным токеном, события от поверхности, лимиты частоты, истечение |
 | `ads-eval` | Golden set (32 диалога) и прогон с отчётом по метрикам |
 | `ads-demo` | Spring Boot приложение: агент, чат, рекламный слот, отладочная панель |
-| `llm-cli-proxy` | Отдельное приложение: OpenAI-совместимый API (`/v1/chat/completions`, `/v1/models`) поверх Claude Code CLI и Qwen Code CLI. Основное приложение о CLI не знает |
+| `llm-cli-proxy` | Отдельное приложение: OpenAI-совместимый API (`/v1/chat/completions`, `/v1/models`) поверх Claude Code CLI и Qwen Code CLI. Сейчас не используется, оставлен для отладки без GigaChat |
 
-## Модели: прод и локальная отладка
+## Модели: GigaChat API
 
-Приложение знает один протокол — OpenAI-совместимый (`provider: internal`). В проде это GigaChat внутри контура через официальный прокси Сбера [gpt2giga](https://developers.sber.ru/docs/ru/gigachain/tools/utilities/gpttogiga-proxy-server). Для отладки на синтетических данных тот же протокол отдаёт `llm-cli-proxy`:
+Все этапы и эмбеддинги идут в GigaChat API напрямую, через библиотеку [spring-ai-gigachat](https://github.com/ai-forever/spring-ai-gigachat) (`chat.giga:spring-ai-gigachat`). Библиотека получает OAuth-токен по ключу авторизации и обновляет его до истечения (токен живёт 30 минут), проверяет TLS по корневому сертификату Минцифры, умеет вход по клиентскому сертификату.
 
 ```
-прод:     ads-demo ──OpenAI API──► gpt2giga ──► GigaChat внутри контура
-отладка:  ads-demo / ads-eval ──OpenAI API──► llm-cli-proxy :8090 ──► claude -p … / qwen -p …
+ads-demo / ads-eval ──► GigaChatClients ──OAuth──► ngw.devices.sberbank.ru:9443
+                                         └──HTTPS──► api.giga.chat/v1: chat/completions, embeddings
+```
+
+| Этап | Модель по умолчанию |
+| --- | --- |
+| Гейт, интент | `GigaChat-2` |
+| Судья, обогащение кампаний, агент демо | `GigaChat-2-Max` |
+| Эмбеддинги | `EmbeddingsGigaR` (вектор 2560) |
+
+JSON-схему GigaChat API в запросе не принимает: шлюз добавляет её инструкцией в промпт, проверяет ответ и при ошибке один раз повторяет. Маскирование персональных данных включено всегда.
+
+Для отладки — публичный API с ключом физлица (`GIGACHAT_API_PERS`) и только синтетические данные. В контуре меняются адреса (`GIGACHAT_BASE_URL`, `GIGACHAT_AUTH_URL`), scope и способ входа; код тот же. Провайдер `internal` (любой OpenAI-совместимый сервер: gpt2giga, vLLM, `llm-cli-proxy`) остался в коде и подключается конфигом.
+
+## Настройка GigaChat API
+
+### 1. Получите ключ авторизации
+
+В [личном кабинете GigaChat API](https://developers.sber.ru/studio) создайте проект GigaChat API и скопируйте **ключ авторизации** (Authorization key — Base64 от `client_id:client_secret`). Для физлица scope — `GIGACHAT_API_PERS`, для юрлица — `GIGACHAT_API_B2B` или `GIGACHAT_API_CORP`.
+
+### 2. Скачайте корневой сертификат Минцифры
+
+Сертификаты GigaChat выпущены российским УЦ, которому JVM по умолчанию не доверяет. Скачайте [russian_trusted_root_ca.cer](https://gu-st.ru/content/Other/doc/russian_trusted_root_ca.cer) и сохраните, например, в `~/certs/`.
+
+### 3. Заполните `.env`
+
+```bash
+cp example.env .env
+```
+
+```properties
+GIGACHAT_CREDENTIALS=<ключ авторизации>
+GIGACHAT_SCOPE=GIGACHAT_API_PERS
+GIGACHAT_CA_CERTS=/Users/<вы>/certs/russian_trusted_root_ca.cer
+```
+
+`.env` в `.gitignore`. Его читают демо (`spring.config.import`) и прогон golden set; переменные окружения с теми же именами имеют приоритет.
+
+### 4. Проверьте ключ
+
+```bash
+set -a; source .env; set +a
+```
+
+```bash
+curl -s --cacert "$GIGACHAT_CA_CERTS" https://ngw.devices.sberbank.ru:9443/api/v2/oauth -H "Authorization: Basic $GIGACHAT_CREDENTIALS" -H "RqUID: $(uuidgen)" -H 'Content-Type: application/x-www-form-urlencoded' -d "scope=$GIGACHAT_SCOPE"
+```
+
+В ответе — `access_token` и `expires_at`.
+
+### 5. Настройки
+
+| Переменная | По умолчанию | Что задаёт |
+| --- | --- | --- |
+| `GIGACHAT_CREDENTIALS` | — | Ключ авторизации |
+| `GIGACHAT_SCOPE` | `GIGACHAT_API_PERS` | Scope доступа |
+| `GIGACHAT_CA_CERTS` | — | Корневой сертификат (PEM) |
+| `GIGACHAT_CERTIFICATE`, `GIGACHAT_PRIVATE_KEY` | — | Вход по клиентскому сертификату вместо ключа |
+| `GIGACHAT_BASE_URL` | `https://api.giga.chat/v1/` | Адрес API (в контуре — свой) |
+| `GIGACHAT_AUTH_URL` | `https://ngw.devices.sberbank.ru:9443/api/v2/oauth` | Адрес OAuth |
+| `ADS_LLM_FAST_MODEL` | `GigaChat-2` | Модель гейта и интента |
+| `ADS_LLM_STRONG_MODEL` | `GigaChat-2-Max` | Модель судьи, обогащения и агента |
+| `ADS_EMBEDDING_MODEL` | `EmbeddingsGigaR` | Модель эмбеддингов; `Embeddings` — дешевле, вектор 1024 |
+| `ADS_MATCHING_DEADLINE` | `2500ms` | Дедлайн подбора на ходе |
+
+Таймауты и повторы — в `ads.llm.gigachat.*` (`read-timeout: 60s`, `max-retries: 1` — повтор только при сетевых ошибках и 5xx).
+
+### Неполадки
+
+| Симптом | Причина и что делать |
+| --- | --- |
+| Демо не стартует: «не задан ключ авторизации» | Нет `GIGACHAT_CREDENTIALS`: заполните `.env` (шаг 3) |
+| `PKIX path building failed` | JVM не доверяет сертификату: укажите `GIGACHAT_CA_CERTS` (шаг 2) |
+| 401 от OAuth | Неверный ключ или scope не совпадает с проектом в личном кабинете |
+| 402 Payment Required | Исчерпан пакет токенов модели — проверьте баланс в личном кабинете |
+| 404 / «model not found» | Модель недоступна для вашего scope: сверьте имена с `GET /models` |
+| 429 | Превышен лимит одновременных запросов; уменьшите `-Pparallelism` у golden set |
+| Подбор всегда «без рекламы», `NO_CANDIDATES` | Каталог проиндексирован другой моделью эмбеддингов — пересоздайте базу (раздел «Запуск демо») |
+
+## Запуск демо
+
+Postgres с pgvector:
+
+```bash
+docker compose up -d
+```
+
+Демо на GigaChat (ключ — в `.env`, раздел «Настройка GigaChat API»). При первом старте в пустую базу заливаются 17 базовых синтетических продуктов, их интенты индексируются EmbeddingsGigaR:
+
+```bash
+./gradlew :ads-demo:bootRun
+```
+
+Откройте http://localhost:8080. Слева — чат и рекламный слот, справа — решения по ходам: интент, темы, кандидаты, оценки судьи, задержки.
+
+Векторы привязаны к модели эмбеддингов, а каталог заливается только в пустую базу. Если база заполнялась с другой моделью (например, в профиле `claude` с хэширующими эмбеддингами), пересоздайте её:
+
+```bash
+docker compose down -v && docker compose up -d
+```
+
+Профили:
+
+- без профиля — GigaChat API на всех этапах, эмбеддинги EmbeddingsGigaR, маскирование включено;
+- `claude`, `local` — через `llm-cli-proxy` (сейчас не используются), хэширующие эмбеддинги, 1000 синтетических кампаний, дедлайн выключен.
+
+С реальным каталогом синтетику отключает `ADS_SYNTHETIC_COUNT=0`.
+
+## llm-cli-proxy (сейчас не используется)
+
+Основной путь — GigaChat API, прокси оставлен как запасной вариант для отладки без ключа GigaChat. Приложение подключается к нему как к OpenAI-совместимому серверу (`provider: internal`) в профилях `claude` и `local`; эмбеддинги там хэширующие.
+
+Прокси вызывает CLI от имени пользователя машины и ходит к внешним моделям, поэтому — только локально и только с синтетическими данными.
+
+```
+ads-demo / ads-eval ──OpenAI API──► llm-cli-proxy :8090 ──► claude -p … / qwen -p …
 ```
 
 Модель выбирается именем: `claude/haiku`, `claude/sonnet`, `qwen`, `qwen/<модель>` или псевдоним из `proxy.aliases` (`fast`, `strong`). JSON-схема из `response_format: json_schema` уходит в `claude --json-schema`; для qwen прокси добавляет её в промпт и вырезает JSON из ответа. Прокси слушает только `127.0.0.1`, при необходимости — с ключом (`PROXY_API_KEY`). Потоковые ответы и инструменты не поддерживаются.
-
-## Настройка llm-cli-proxy
-
-Прокси вызывает CLI от имени пользователя машины и ходит к внешним моделям, поэтому — только локально и только с синтетическими данными.
 
 ### 1. Установите и авторизуйте CLI
 
@@ -105,7 +215,7 @@ curl -s http://127.0.0.1:8090/v1/chat/completions -H 'Content-Type: application/
 
 ### 5. Подключите приложение
 
-Профили `claude` и `local` уже смотрят на `http://localhost:8090/v1`, с таймаутом 180 с и без повторов в клиенте: зависший вызов повторяет прокси, а лишний вызов CLI дорог. Если прокси на другом адресе или с ключом:
+Перед переключением с GigaChat пересоздайте базу (раздел «Запуск демо»): векторы привязаны к модели эмбеддингов. Профили `claude` и `local` уже смотрят на `http://localhost:8090/v1`, с таймаутом 180 с и без повторов в клиенте: зависший вызов повторяет прокси, а лишний вызов CLI дорог. Если прокси на другом адресе или с ключом:
 
 ```bash
 ADS_LLM_BASE_URL=http://127.0.0.1:9090/v1 ADS_LLM_API_KEY=секрет ./gradlew :ads-demo:bootRun --args='--spring.profiles.active=claude'
@@ -124,55 +234,13 @@ ADS_LLM_BASE_URL=http://127.0.0.1:9090/v1 ADS_LLM_API_KEY=секрет ./gradlew
 | 504 «CLI не ответил» | CLI завис дважды подряд: проверьте вызов вручную и сеть |
 | Приложение падает по таймауту раньше прокси | `ads.llm.internal.timeout` должен быть больше двух попыток прокси (по умолчанию 180 с против 2 × 60 с) |
 
-## Запуск демо
-
-Postgres с pgvector:
-
-```bash
-docker compose up -d
-```
-
-Прокси к CLI (установка и проверка — в разделе «Настройка llm-cli-proxy»):
-
-```bash
-./gradlew :llm-cli-proxy:bootRun
-```
-
-Демо, каталог из 1000 синтетических кампаний заливается при первом старте:
-
-```bash
-./gradlew :ads-demo:bootRun --args='--spring.profiles.active=claude'
-```
-
-Откройте http://localhost:8080. Слева — чат и рекламный слот, справа — решения по ходам: интент, темы, кандидаты, оценки судьи, задержки.
-
-Профили:
-
-- без профиля — прод-конфигурация: GigaChat через gpt2giga, маскирование включено, JSON-схема — инструкцией в промпте (`native-schema: false`), эмбеддинги — EmbeddingsGigaR;
-- `claude` — все этапы через llm-cli-proxy на Claude (судья — `claude/sonnet`, остальное — `claude/haiku`), дедлайн выключен;
-- `local` — все этапы через llm-cli-proxy на Qwen.
-
-Профили через прокси — только для синтетических данных.
-
-Прод-конфигурация задаётся переменными окружения:
-
-| Переменная | По умолчанию | Что задаёт |
-| --- | --- | --- |
-| `ADS_LLM_BASE_URL` | `http://localhost:8090/v1` | Адрес gpt2giga; 8090 — его порт по умолчанию, совпадает с llm-cli-proxy |
-| `ADS_LLM_API_KEY` | `none` | Ключ доступа к gpt2giga (не ключ GigaChat — тот хранится в gpt2giga) |
-| `ADS_LLM_FAST_MODEL` | `GigaChat-2-Lite` | Модель гейта и интента |
-| `ADS_LLM_STRONG_MODEL` | `GigaChat-2-Max` | Модель судьи, обогащения и агента |
-| `ADS_EMBEDDING_MODEL` | `EmbeddingsGigaR` | Модель эмбеддингов |
-
-ID моделей зависят от поставки GigaChat в контуре — сверьте их с `GET /v1/models` у gpt2giga.
-
 ## Тесты
 
 ```bash
 ./gradlew test
 ```
 
-Интеграционные тесты (`*IT`) поднимают Postgres с pgvector через Testcontainers — нужен Docker. Совместимость прокси проверяется настоящим клиентом Spring AI OpenAI. Живой вызов Claude CLI:
+Интеграционные тесты (`*IT`) поднимают Postgres с pgvector через Testcontainers — нужен Docker. Провайдер GigaChat проверяется на фейковом сервере (OAuth, чат, эмбеддинги); ключ для тестов не нужен. Совместимость прокси проверяется настоящим клиентом Spring AI OpenAI. Живой вызов Claude CLI:
 
 ```bash
 ./gradlew :llm-cli-proxy:test -PllmCli
@@ -180,15 +248,15 @@ ID моделей зависят от поставки GigaChat в контур�
 
 ## Golden set
 
-При запущенном `llm-cli-proxy`:
+На GigaChat (ключ — в `.env`):
 
 ```bash
-./gradlew :ads-eval:eval -Pmodel=claude/haiku -PjudgeModel=claude/haiku -Precording=record
+./gradlew :ads-eval:eval
 ```
 
-Ответы моделей пишутся в `ads-eval/llm-cassettes`: повторный прогон с теми же промптами бесплатный и детерминированный (`-Precording=replay` — без обращения к модели). Отчёт — `ads-eval/build/eval/report.md`.
+Модели и эмбеддинги меняются параметрами: `-Pmodel=GigaChat-2-Pro -PjudgeModel=GigaChat-2-Max -Pembedding=Embeddings`. Ответы моделей пишутся в `ads-eval/llm-cassettes`: повторный прогон с теми же промптами не тратит токены чата (`-Precording=replay` — без обращения к модели; эмбеддинги в кассеты не пишутся). Отчёт — `ads-eval/build/eval/report.md`.
 
-Последний прогон (haiku на всех этапах): 31 из 32 кейсов, precision@1 100% (17/17), показ там, где ожидался, — 17/18, «без рекламы» — 12/12, показов на стоп-темах — 0. Единственный провал — двусмысленная реплика «…реквизиты для зарплаты. Можно сюда?»: гейт прочитал её как отправку реквизитов в чат и перестраховался.
+На GigaChat golden set ещё не прогонялся. Последний прогон — на Claude haiku через `llm-cli-proxy` с хэширующими эмбеддингами (`-Pprovider=internal -Pmodel=claude/haiku`): 31 из 32 кейсов, precision@1 100% (17/17), показ там, где ожидался, — 17/18, «без рекламы» — 12/12, показов на стоп-темах — 0. Единственный провал — двусмысленная реплика «…реквизиты для зарплаты. Можно сюда?»: гейт прочитал её как отправку реквизитов в чат и перестраховался.
 
 ## API
 
@@ -203,9 +271,8 @@ ID моделей зависят от поставки GigaChat в контур�
 
 ## Известные ограничения прототипа
 
-- Эмбеддинги — хэширующие (`HashingTextEmbedder`): ловят лексику с учётом окончаний, но не смысл. Из-за этого негативный интент отсекает кампанию только с запасом `ads.matching.negative-margin` (0.1). В прод-конфигурации — EmbeddingsGigaR через gpt2giga. Векторы привязаны к модели (`embedding_model`), поэтому каталог, проиндексированный хэширующими эмбеддингами, на EmbeddingsGigaR ничего не найдёт: при смене модели кампании нужно переиндексировать. Отдельной команды переиндексации в прототипе нет — индекс строится при одобрении и импорте кампании.
-- Работа на GigaChat не проверялась: golden set прогонялся только на Claude haiku, пороги подобраны на нём.
+- Работа на GigaChat не проверялась на живом API: golden set прогонялся только на Claude haiku с хэширующими эмбеддингами. Пороги подобраны там и требуют перекалибровки на GigaChat и EmbeddingsGigaR: `min-similarity` (0.2), `negative-margin` (0.1), `cache-query-similarity` (0.9) — у смысловых эмбеддингов сходство разных запросов выше, и кэш сессии может срабатывать лишний раз. Дедлайн 2.5 с на GigaChat не замерен.
+- Векторы привязаны к модели эмбеддингов (`embedding_model`); отдельной команды переиндексации нет — индекс строится при одобрении и импорте кампании. При смене модели базу с синтетикой пересоздают.
 - Маскирование — регулярными выражениями; ФИО не ловятся, нужен NER-сервис.
-- Задержка подбора через llm-cli-proxy — 5–20 с на ход: это свойство CLI, не пайплайна. Дедлайн проверен тестами, на прод-моделях его нужно замерить.
 - В синтетическом каталоге варианты одного продукта почти одинаковы, поэтому топ-20 кандидатов часто занимает один продукт.
 - Конверсии (действия в сценарии) не принимаются: в бою они приходят фоновыми потоками.
