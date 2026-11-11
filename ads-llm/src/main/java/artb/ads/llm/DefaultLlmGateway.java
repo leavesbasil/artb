@@ -16,8 +16,8 @@ import org.springframework.ai.converter.BeanOutputConverter;
 import artb.ads.llm.masking.PiiMasker;
 
 /**
- * Вызов модели этапа со структурированным ответом. Если модель умеет схему сама (Claude CLI),
- * схема передаётся ей; иначе инструкции формата добавляются в запрос, ответ проверяется,
+ * Вызов модели этапа со структурированным ответом. Если модель умеет схему сама
+ * ({@code response_format: json_schema}), схема передаётся ей; иначе инструкции формата добавляются в запрос, ответ проверяется,
  * и при ошибке делается один повтор с текстом ошибки.
  */
 public class DefaultLlmGateway implements LlmGateway {

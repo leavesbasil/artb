@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "472f423bf30af96642d5c2504a8fd8f7",
-  "recordedAt" : "2026-11-10T07:48:23.377425Z",
-  "text" : "{\"commercialIntent\":0.85,\"queries\":[\"Клиент получил годовую премию и хочет разместить деньги под процент\",\"Клиент ищет способ сохранить и приумножить свободные средства без риска\"],\"topics\":[{\"id\":\"deposit\",\"confidence\":0.95},{\"id\":\"savings_account\",\"confidence\":0.6},{\"id\":\"investments\",\"confidence\":0.3}]}"
-}

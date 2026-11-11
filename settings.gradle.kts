@@ -13,5 +13,4 @@ include(
     "ads-delivery",
     "ads-eval",
     "ads-demo",
-    "llm-cli-proxy",
 )

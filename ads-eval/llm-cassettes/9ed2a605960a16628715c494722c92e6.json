@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "9ed2a605960a16628715c494722c92e6",
-  "recordedAt" : "2026-11-10T07:48:44.471121Z",
-  "text" : "{\"commercialIntent\":0.6,\"queries\":[\"клиент хочет начать инвестировать и не знает с чего начать\",\"клиент выбирает первый инвестиционный инструмент для начинающего\"],\"topics\":[{\"id\":\"investments\",\"confidence\":0.9},{\"id\":\"savings_account\",\"confidence\":0.2}]}"
-}

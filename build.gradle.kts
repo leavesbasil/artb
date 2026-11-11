@@ -37,12 +37,7 @@ subprojects {
     }
 
     tasks.withType<Test>().configureEach {
-        useJUnitPlatform {
-            // Тесты на живом Claude CLI: ./gradlew test -PllmCli
-            if (!project.hasProperty("llmCli")) {
-                excludeTags("llm-cli")
-            }
-        }
+        useJUnitPlatform()
         systemProperty("file.encoding", "UTF-8")
         testLogging {
             events("failed")

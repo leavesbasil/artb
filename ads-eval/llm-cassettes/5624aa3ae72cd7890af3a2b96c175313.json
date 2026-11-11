@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "5624aa3ae72cd7890af3a2b96c175313",
-  "recordedAt" : "2026-11-10T07:48:23.829036Z",
-  "text" : "{\"commercialIntent\":0.65,\"queries\":[\"клиент имеет три кредита в разных банках и хочет упростить выплаты\",\"клиент ищет способ объединить несколько кредитов в один платёж\"],\"topics\":[{\"id\":\"refinancing\",\"confidence\":0.9},{\"id\":\"consumer_loan\",\"confidence\":0.35},{\"id\":\"payments\",\"confidence\":0.3}]}"
-}

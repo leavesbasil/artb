@@ -53,16 +53,15 @@ public class LlmProperties {
     }
 
     /**
-     * Любой OpenAI-совместимый сервер (провайдер internal): vLLM, gpt2giga или локальный
-     * llm-cli-proxy поверх Claude Code CLI или Qwen Code CLI.
+     * Любой OpenAI-совместимый сервер (провайдер internal): gpt2giga перед GigaChat, vLLM и т. п.
      */
     public static class Internal {
         private String baseUrl = "http://localhost:8000/v1";
         private String apiKey = "none";
         private Duration timeout = Duration.ofSeconds(30);
-        /** Повторы SDK. Для llm-cli-proxy — 0: прокси сам повторяет зависший вызов, а лишний вызов CLI дорог. */
+        /** Повторы SDK при сетевых ошибках и 5xx. */
         private int maxRetries = 2;
-        /** Передавать JSON-схему как response_format (vLLM и llm-cli-proxy поддерживают); иначе — инструкцией в промпте. */
+        /** Передавать JSON-схему как response_format (если сервер поддерживает, например vLLM); иначе — инструкцией в промпте. */
         private boolean nativeSchema = true;
 
         public int getMaxRetries() { return maxRetries; }

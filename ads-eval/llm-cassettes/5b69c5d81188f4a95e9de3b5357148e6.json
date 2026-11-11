@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "5b69c5d81188f4a95e9de3b5357148e6",
-  "recordedAt" : "2026-11-10T07:49:23.587810Z",
-  "text" : "{\"commercialIntent\":0.5,\"queries\":[\"клиент ждёт второго ребёнка и понимает, что двухкомнатная квартира становится тесной\",\"клиент думает о переезде в более просторное жильё для семьи с двумя детьми\"],\"topics\":[{\"id\":\"kids_family\",\"confidence\":0.9},{\"id\":\"real_estate\",\"confidence\":0.6},{\"id\":\"mortgage\",\"confidence\":0.45}]}"
-}

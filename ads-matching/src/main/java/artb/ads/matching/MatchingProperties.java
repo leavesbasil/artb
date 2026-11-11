@@ -28,7 +28,7 @@ public class MatchingProperties {
     private int minTopicCandidates = 5;
     /** Сходство запросов с прошлым ходом, выше которого retrieval и судья берутся из кэша. */
     private double cacheQuerySimilarity = 0.9;
-    /** В CLI-профилях дедлайн выключен: вызов CLI занимает секунды. Сам дедлайн — ads.delivery.default-deadline. */
+    /** Выключается в прогоне golden set. Сам дедлайн — ads.delivery.default-deadline. */
     private boolean deadlineEnabled = true;
 
     public int getHistoryTurns() { return historyTurns; }

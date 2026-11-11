@@ -6,7 +6,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatOptions;
 
 /**
- * Модель на OpenAI-совместимом сервере (vLLM внутри контура, локальный llm-cli-proxy).
+ * Модель на OpenAI-совместимом сервере (gpt2giga, vLLM).
  * JSON-схема передаётся как {@code response_format: json_schema}, если сервер это поддерживает.
  * Модель в опциях вызова указывается явно: опции без модели Spring AI дополняет своей моделью
  * по умолчанию, а не моделью клиента.

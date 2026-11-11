@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "bba94ae18748c537d810b8ece1233750",
-  "recordedAt" : "2026-11-10T07:49:10.893428Z",
-  "text" : "{\"commercialIntent\":0.85,\"queries\":[\"клиент в основном тратит деньги в супермаркетах и хочет выбрать карту с максимальным кэшбэком\",\"клиент сравнивает банковские карты по выгоде для повседневных покупок\"],\"topics\":[{\"id\":\"cashback\",\"confidence\":0.95},{\"id\":\"debit_card\",\"confidence\":0.5},{\"id\":\"credit_card\",\"confidence\":0.3}]}"
-}

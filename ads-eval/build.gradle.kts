@@ -8,8 +8,8 @@ dependencies {
 // ключ авторизации в GIGACHAT_CREDENTIALS (в окружении или в файле .env в корне, он в .gitignore).
 //   ./gradlew :ads-eval:eval
 //   ./gradlew :ads-eval:eval -Pmodel=GigaChat-2-Pro -PjudgeModel=GigaChat-2-Max -Pembedding=EmbeddingsGigaR
-// Через llm-cli-proxy (сейчас не используется):
-//   ./gradlew :ads-eval:eval -Pprovider=internal -Pmodel=claude/haiku
+// Любой OpenAI-совместимый сервер (gpt2giga, vLLM):
+//   ./gradlew :ads-eval:eval -Pprovider=internal -PbaseUrl=http://localhost:8090/v1 -Pmodel=<модель>
 tasks.register<JavaExec>("eval") {
     group = "verification"
     description = "Прогон golden set и отчёт по метрикам"

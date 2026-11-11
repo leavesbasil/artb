@@ -53,7 +53,7 @@ import artb.ads.targeting.MockClientSegmentsProvider;
 
 /**
  * Прогон golden set без базы: базовый каталог в памяти, модели — GigaChat API (ключ в GIGACHAT_CREDENTIALS)
- * или любой OpenAI-совместимый сервер ({@code -Pprovider=internal}, например llm-cli-proxy).
+ * или любой OpenAI-совместимый сервер ({@code -Pprovider=internal -PbaseUrl=… -Pmodel=…}: gpt2giga, vLLM).
  * Каждый кейс — отдельная сессия без лимитов частоты. Ответы моделей пишутся в кассеты,
  * повторный прогон с теми же промптами бесплатный.
  */
@@ -62,8 +62,11 @@ public final class EvalMain {
     public static void main(String[] args) throws Exception {
         String provider = System.getProperty("eval.provider", "gigachat");
         boolean gigachat = provider.equals("gigachat");
-        String baseUrl = System.getProperty("eval.baseUrl", gigachat ? null : "http://localhost:8090/v1");
-        String model = System.getProperty("eval.model", gigachat ? "GigaChat-2" : "claude/haiku");
+        String baseUrl = System.getProperty("eval.baseUrl");
+        String model = System.getProperty("eval.model", gigachat ? "GigaChat-2" : null);
+        if (!gigachat && (baseUrl == null || model == null)) {
+            throw new IllegalArgumentException("Для -Pprovider=internal нужны -PbaseUrl и -Pmodel");
+        }
         String judgeModel = System.getProperty("eval.judgeModel", gigachat ? "GigaChat-2-Max" : model);
         String embedding = System.getProperty("eval.embedding", gigachat ? "EmbeddingsGigaR" : "hashing");
         // У ключа GigaChat физлица лимит одновременных запросов — по умолчанию последовательно.
@@ -79,8 +82,7 @@ public final class EvalMain {
             configureGigaChat(llmProps.getGigachat(), baseUrl);
         } else {
             llmProps.getInternal().setBaseUrl(baseUrl);
-            llmProps.getInternal().setTimeout(Duration.ofSeconds(180));
-            llmProps.getInternal().setMaxRetries(0);
+            llmProps.getInternal().setTimeout(Duration.ofSeconds(120));
         }
         llmProps.getRecording().setMode(recording);
         llmProps.getRecording().setDir(Path.of("ads-eval/llm-cassettes"));

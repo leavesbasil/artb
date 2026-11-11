@@ -15,7 +15,7 @@ import artb.ads.llm.recording.RecordingChatModel;
  * Создаёт и кэширует {@link ChatModel} для каждого этапа по конфигу. Провайдеры:
  * <ul>
  *   <li>{@code gigachat} — GigaChat API напрямую (основной);</li>
- *   <li>{@code internal} — любой OpenAI-совместимый сервер, в том числе llm-cli-proxy для отладки на CLI.</li>
+ *   <li>{@code internal} — любой OpenAI-совместимый сервер (gpt2giga, vLLM).</li>
  * </ul>
  */
 public class StageModels {
@@ -43,7 +43,7 @@ public class StageModels {
             case "gigachat" -> gigaChat.chatModel(sm.model());
             case "internal" -> openAiCompatible(sm);
             default -> throw new IllegalArgumentException("Неизвестный провайдер модели: " + sm.provider()
-                    + ". Поддерживаются gigachat и internal (OpenAI-совместимый сервер, для CLI — llm-cli-proxy)");
+                    + ". Поддерживаются gigachat и internal (OpenAI-совместимый сервер)");
         };
     }
 

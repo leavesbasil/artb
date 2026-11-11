@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "90db541fdc0eb67c52bd837220ebe175",
-  "recordedAt" : "2026-11-10T07:49:47.239797Z",
-  "text" : "{\"commercialIntent\":0.55,\"queries\":[\"клиент продал старый автомобиль и хранит выручку на карте до покупки нового через год\",\"клиент копит деньги на покупку автомобиля и ищет, где их выгодно сохранить\"],\"topics\":[{\"id\":\"savings_account\",\"confidence\":0.8},{\"id\":\"deposit\",\"confidence\":0.6},{\"id\":\"auto\",\"confidence\":0.7},{\"id\":\"debit_card\",\"confidence\":0.3},{\"id\":\"investments\",\"confidence\":0.2}]}"
-}

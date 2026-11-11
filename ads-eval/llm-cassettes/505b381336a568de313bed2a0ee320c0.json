@@ -1,6 +1,0 @@
-{
-  "model" : "internal:claude/haiku",
-  "key" : "505b381336a568de313bed2a0ee320c0",
-  "recordedAt" : "2026-11-10T07:50:02.946497Z",
-  "text" : "{\"commercialIntent\":0.05,\"queries\":[\"клиент хочет сменить ПИН-код банковской карты через приложение\",\"клиент ищет, где в приложении банка настроить безопасность карты\"],\"topics\":[{\"id\":\"app_help\",\"confidence\":0.85},{\"id\":\"debit_card\",\"confidence\":0.5}]}"
-}
