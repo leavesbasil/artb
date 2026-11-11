@@ -43,7 +43,7 @@ ads:
     embedding:
       # hashing — локальные лексические эмбеддинги, если на эмбеддинги GigaChat нет пакета токенов (402)
       provider: ${ADS_EMBEDDING_PROVIDER:gigachat}
-      model: ${ADS_EMBEDDING_MODEL:EmbeddingsGigaR}   # вектор 2560; колонка vector без фиксированной размерности
+      model: ${ADS_EMBEDDING_MODEL:Embeddings}   # вектор 1024; EmbeddingsGigaR — 2560; колонка vector без фиксированной размерности
       dimensions: 384                                  # только для hashing
   catalog:
     # 17 базовых синтетических продуктов (эмбеддинги платные — больше без нужды не заливаем).

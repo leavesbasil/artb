@@ -68,7 +68,7 @@ public final class EvalMain {
             throw new IllegalArgumentException("Для -Pprovider=internal нужны -PbaseUrl и -Pmodel");
         }
         String judgeModel = System.getProperty("eval.judgeModel", gigachat ? "GigaChat-2-Max" : model);
-        String embedding = System.getProperty("eval.embedding", gigachat ? "EmbeddingsGigaR" : "hashing");
+        String embedding = System.getProperty("eval.embedding", gigachat ? "Embeddings" : "hashing");
         // У ключа GigaChat физлица лимит одновременных запросов — по умолчанию последовательно.
         int parallelism = Integer.parseInt(System.getProperty("eval.parallelism", gigachat ? "1" : "4"));
         String recording = System.getProperty("eval.recording", "record");
