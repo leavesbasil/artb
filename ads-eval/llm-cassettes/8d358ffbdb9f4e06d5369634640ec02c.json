@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "8d358ffbdb9f4e06d5369634640ec02c",
+  "recordedAt" : "2026-11-12T09:31:30.136034Z",
+  "text" : "{\n  \"commercialIntent\": 1.0,\n  \"queries\": [\n    \"Клиент регистрирует ИП и ищет подходящий банковский счёт для бизнеса.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"business\"\n    }\n  ]\n}"
+}

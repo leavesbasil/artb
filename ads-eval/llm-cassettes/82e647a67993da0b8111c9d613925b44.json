@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "82e647a67993da0b8111c9d613925b44",
+  "recordedAt" : "2026-11-12T09:31:22.839968Z",
+  "text" : "{\n  \"commercialIntent\": 0.8,\n  \"queries\": [\n    \"Клиент ищет детскую дебетовую карту для выдачи карманных денег сыну.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"debit_card\"\n    }\n  ]\n}"
+}

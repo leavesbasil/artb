@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "6c1b2623436c13772e10071d6d0c6986",
+  "recordedAt" : "2026-11-12T09:31:52.714173Z",
+  "text" : "{\n  \"commercialIntent\": 1.0,\n  \"queries\": [\n    \"нужны реквизиты для перевода заработной платы в банк\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"salary\"\n    }\n  ]\n}"
+}

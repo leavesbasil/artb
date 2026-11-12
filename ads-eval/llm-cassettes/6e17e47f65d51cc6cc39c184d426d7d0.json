@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "6e17e47f65d51cc6cc39c184d426d7d0",
+  "recordedAt" : "2026-11-12T09:32:16.800201Z",
+  "text" : "{\n  \"commercialIntent\": 1.0,\n  \"queries\": [\n    \"мама получает пенсию и интересуется возможностью перевода пенсии на карту банка\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"pension\"\n    }\n  ]\n}"
+}

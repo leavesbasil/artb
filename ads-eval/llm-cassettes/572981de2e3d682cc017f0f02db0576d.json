@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "572981de2e3d682cc017f0f02db0576d",
+  "recordedAt" : "2026-11-12T09:31:12.063131Z",
+  "text" : "```{\"commercialIntent\":0.7,\"queries\":[\"клиенты планируют поездку в Турцию\",\"спрашивают о необходимости страховки для поездки\"],\"topics\":[{\"confidence\":1.0,\"id\":\"insurance\"},{\"confidence\":0.0,\"id\":\"travel\"}]}```"
+}

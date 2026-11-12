@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "bc8f2c3d3e9834cbe921303c763f1c47",
+  "recordedAt" : "2026-11-12T09:30:40.934870Z",
+  "text" : "{\n  \"commercialIntent\": 0.8,\n  \"queries\": [\n    \"Клиент ищет решение для объединения платежей по трем кредитам в один ежемесячный платеж.\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"refinancing\",\n      \"confidence\": 1.0\n    }\n  ]\n}"
+}

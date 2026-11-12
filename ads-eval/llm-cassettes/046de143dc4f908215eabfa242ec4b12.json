@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "046de143dc4f908215eabfa242ec4b12",
+  "recordedAt" : "2026-11-12T09:34:14.236939Z",
+  "text" : "{\n  \"commercialIntent\": 0.4,\n  \"queries\": [\n    \"Хранение средств после продажи автомобиля перед покупкой нового\",\n    \"Оптимальное размещение свободных денежных средств\",\n    \"Как сохранить капитал до крупной покупки\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"auto\",\n      \"confidence\": 0.3\n    },\n    {\n      \"id\": \"savings_account\",\n      \"confidence\": 0.8\n    }\n  ]\n}"
+}

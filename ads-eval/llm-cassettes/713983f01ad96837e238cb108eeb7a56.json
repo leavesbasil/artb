@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "713983f01ad96837e238cb108eeb7a56",
+  "recordedAt" : "2026-11-12T09:31:39.438670Z",
+  "text" : "{\n  \"commercialIntent\": 1.0,\n  \"queries\": [\n    \"клиент ищет кредитную карту с длительным льготным периодом\"\n  ],\n  \"topics\": []\n}"
+}

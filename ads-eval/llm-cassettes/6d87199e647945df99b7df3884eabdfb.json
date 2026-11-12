@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "6d87199e647945df99b7df3884eabdfb",
+  "recordedAt" : "2026-11-12T09:33:40.065138Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"планирует путешествие в Грузию на майские праздники\",\n    \"бронирует отель и билеты\",\n    \"ищет финансовые продукты для поездки\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"travel\",\n      \"confidence\": 1.0\n    }\n  ]\n}"
+}

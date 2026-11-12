@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "48a8ac5059c4981c87ce65c213668526",
+  "recordedAt" : "2026-11-12T09:30:49.806310Z",
+  "text" : "{\n  \"commercialIntent\": 1.0,\n  \"queries\": [\n    \"Клиент ищет способ выгодно разместить премию под процент.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"deposit\"\n    }\n  ]\n}"
+}

@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "d192aa76f55351b153adf398865b1f0c",
+  "recordedAt" : "2026-11-12T09:34:29.813879Z",
+  "text" : "{\n  \"commercialIntent\": 0.8,\n  \"queries\": [\n    \"клиент планирует ремонт кухни и ищет способы финансирования\",\n    \"не хватает собственных средств на ремонт\",\n    \"интересуется возможностью взять кредит на ремонт\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"consumer_loan\",\n      \"confidence\": 1.0\n    },\n    {\n      \"id\": \"home_renovation\",\n      \"confidence\": 1.0\n    }\n  ]\n}"
+}

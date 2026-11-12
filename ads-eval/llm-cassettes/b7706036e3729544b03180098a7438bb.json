@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "b7706036e3729544b03180098a7438bb",
+  "recordedAt" : "2026-11-12T09:34:28.798693Z",
+  "text" : "{\n  \"commercialIntent\": 0.2,\n  \"queries\": [\n    \"Клиент интересуется, как оплатить коммунальные услуги через мобильное приложение банка.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"payments\"\n    }\n  ]\n}"
+}

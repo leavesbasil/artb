@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "77a8a6dc6f187dbd3aee25322957108a",
+  "recordedAt" : "2026-11-12T09:33:29.896972Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"семья ожидает второго ребенка\",\n    \"нехватает пространства в квартире\",\n    \"рассматривают варианты расширения жилплощади\"\n  ],\n  \"topics\": [\n    {\n      \"id\": \"real_estate\",\n      \"confidence\": 1.0\n    }\n  ]\n}"
+}

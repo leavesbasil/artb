@@ -1,0 +1,6 @@
+{
+  "model" : "gigachat:GigaChat-2",
+  "key" : "c57a1c922bfe45d0b1b1c47b19914339",
+  "recordedAt" : "2026-11-12T09:33:58.262028Z",
+  "text" : "{\n  \"commercialIntent\": 0.7,\n  \"queries\": [\n    \"Клиент переживает о риске залива соседей после ремонта новой квартиры.\"\n  ],\n  \"topics\": [\n    {\n      \"confidence\": 1.0,\n      \"id\": \"insurance\"\n    }\n  ]\n}"
+}
